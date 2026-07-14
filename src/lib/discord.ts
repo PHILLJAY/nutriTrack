@@ -25,9 +25,34 @@ export function createDiscordBot() {
     );
 
     if (imageAttachments.size === 0) {
-      // If someone sends a text message to the bot, give a helpful nudge
+      // Handle text commands in DMs
       if (message.channel.isDMBased()) {
-        await message.reply("Send me a photo of your meal and I'll log it for you!");
+        const content = message.content.trim().toLowerCase();
+
+        if (content === "!link" || content === "!id") {
+          await message.reply(
+            `Your Discord ID is: \`${message.author.id}\`\n\n` +
+            `Paste this into the NutriTrack web app to link your account.`
+          );
+          return;
+        }
+
+        // Check if user exists to give better guidance
+        const existingUser = await prisma.user.findUnique({
+          where: { discordId: message.author.id },
+        });
+
+        if (existingUser) {
+          await message.reply("Send me a photo of your meal and I'll log it for you!");
+        } else {
+          await message.reply(
+            "I don't have your account linked yet!\n\n" +
+            "1. Go to the NutriTrack web app\n" +
+            "2. Open Settings and paste this Discord ID:\n" +
+            `\`${message.author.id}\`\n\n` +
+            "Then send me a meal photo to get started!"
+          );
+        }
       }
       return;
     }
@@ -39,7 +64,9 @@ export function createDiscordBot() {
 
     if (!user) {
       await message.reply(
-        "I don't have your account linked yet! Please link your Discord account in the NutriTrack web app settings first."
+        "I don't have your account linked yet!\n\n" +
+        `Your Discord ID is: \`${message.author.id}\`\n` +
+        "Go to the NutriTrack web app → Settings → paste this ID to link your account."
       );
       return;
     }
@@ -71,6 +98,8 @@ interface ProcessedMeal {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
+  sugar?: number;
   healthRating: number;
   mealType: string;
   notes: string;
@@ -130,6 +159,8 @@ async function processMealImage(
     protein: analysis.protein,
     carbs: analysis.carbs,
     fat: analysis.fat,
+    fiber: analysis.fiber,
+    sugar: analysis.sugar,
     healthRating,
     mealType: analysis.mealType,
     notes: analysis.notes,

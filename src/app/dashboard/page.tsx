@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendar } from "@/components/dashboard/WeekCalendar";
-import { Upload, Camera, LogOut } from "lucide-react";
+import { Upload, Camera, LogOut, Settings } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 
 export default function DashboardPage() {
@@ -122,6 +122,13 @@ export default function DashboardPage() {
                 )}
               </Button>
             </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => router.push("/settings")}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
             <Button
               size="icon"
               variant="ghost"
