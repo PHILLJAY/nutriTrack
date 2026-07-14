@@ -4,24 +4,48 @@ AI-powered calorie and nutrition tracker. Log meals by sending photos to a Disco
 
 ## Features
 
-- **Onboarding** — enter your age, gender, height, weight, activity level, and goal. Calculates personalized calorie and macro targets using the Mifflin-St Jeor equation.
-- **Discord bot** — send a meal photo via DM or use slash commands:
-  - `/link` — get your Discord ID to link your account
-  - `/log <description>` — log a meal by text (e.g. `/log 2 eggs and toast`)
-  - `/status` — see today's calorie and macro progress
-  - `/meals` — view your last 5 meals
+### Core
+- **Onboarding** — enter your age, gender, height, weight, activity level, goal, and timezone. Calculates personalized calorie and macro targets using the Mifflin-St Jeor equation.
 - **AI meal analysis** — Google Gemini estimates calories, protein, carbs, fat, fiber, sugar, and sodium from a photo
+- **Manual text entry** — describe a meal in plain English (e.g. "2 eggs and toast") and AI estimates nutrition
 - **Health rating** — each meal gets a 0-100 score based on macro balance, fiber, sugar, sodium, and processing level
 - **Weekly calendar** — day-by-day view with color-coded meal bubbles, expandable to show full macro breakdown
 - **Natural language editing** — type things like "I only ate half" or "the protein should be 35g" and AI updates the meal
-- **Mobile + web** — responsive design, works on any device
+- **Timezone support** — all times display in your local timezone
+
+### Tracking & Analytics
+- **Streak & habit tracking** — current streak, longest streak, and 90-day heatmap
+- **Weekly & monthly reports** — aggregated nutrition data with calorie bar charts and macro pie charts
+- **Week-over-week comparison** — compare this week vs last week with delta indicators
+- **Body weight tracking** — log weight over time with a trend line chart
+- **Water intake tracking** — tap to log glasses of water with a daily goal
+- **Daily macro breakdown** — pie chart and progress bars for protein, carbs, and fat
+
+### Smart Features
+- **AI meal suggestions** — get meal ideas based on your remaining daily macros
+- **Meal templates** — save meals as reusable templates for quick logging
+- **Custom macro ratios** — set your own protein/carbs/fat split (balanced, high protein, keto, low fat presets)
+
+### Discord Bot
+- `/link` — get your Discord ID to link your account
+- `/log <description>` — log a meal by text
+- `/status` — see today's calorie and macro progress
+- `/meals` — view your last 5 meals
+- `/weekly` — 7-day nutrition summary
+- `/goals` — see your current nutrition targets
+- **Photo logging** — send a meal photo via DM and the bot analyzes it automatically
+
+### Data & Settings
+- **Data export** — download meal history as CSV or JSON
+- **Settings page** — link Discord, set timezone, customize macro ratios
 
 ## Tech Stack
 
-- **Frontend**: Next.js 16 (App Router), Tailwind CSS, shadcn/ui
+- **Frontend**: Next.js 16 (App Router), Tailwind CSS, shadcn/ui, Recharts
 - **Database**: SQLite via Prisma ORM (libsql adapter)
-- **AI**: Google Gemini (gemini-2.0-flash) for image analysis and NLP editing
+- **AI**: Google Gemini (gemini-3.1-flash-lite) for image analysis, text analysis, NLP editing, and suggestions
 - **Bot**: Discord.js with slash commands
+- **Validation**: Zod schemas on all API routes
 
 ## Setup
 
@@ -92,23 +116,33 @@ The project includes a `Dockerfile` and `railway.toml` for one-click deployment.
 src/
 ├── app/
 │   ├── onboarding/        # Multi-step onboarding wizard
-│   ├── dashboard/         # Weekly calendar + meal tracking
-│   ├── settings/          # Discord linking + profile
+│   ├── dashboard/         # Weekly calendar + meal tracking + all widgets
+│   ├── reports/           # Weekly/monthly nutrition reports
+│   ├── settings/          # Discord, timezone, macros, export
 │   └── api/
 │       ├── onboarding/    # Create user + calculate targets
-│       ├── meals/         # CRUD + AI analysis + NLP edit
+│       ├── meals/         # CRUD + AI analysis + NLP edit + suggestions
+│       ├── templates/     # Meal template CRUD
+│       ├── streaks/       # Streak calculation
+│       ├── water/         # Water intake tracking
+│       ├── weight/        # Body weight tracking
+│       ├── export/        # CSV/JSON data export
 │       ├── user/          # Profile get/update
 │       └── discord/       # Link Discord account
 ├── components/
 │   ├── onboarding/        # Step components
-│   └── dashboard/         # Calendar, bubbles, detail sheet, editors
+│   └── dashboard/         # Calendar, bubbles, detail sheet, editors,
+│                          # streaks, water, weight, suggestions, charts
 ├── lib/
 │   ├── db.ts              # Prisma client
-│   ├── gemini.ts          # Gemini API (image + NLP)
+│   ├── gemini.ts          # Gemini API (image, text, NLP, suggestions)
 │   ├── discord.ts         # Bot + slash commands
-│   ├── nutrition.ts       # BMR/TDEE calculations
+│   ├── nutrition.ts       # BMR/TDEE calculations + custom macro ratios
 │   ├── health-rating.ts   # 0-100 scoring algorithm
-│   ├── session.ts         # Cookie session management
-│   └── image-store.ts     # File upload handling
+│   ├── session.ts         # HMAC-SHA256 cookie session
+│   ├── image-store.ts     # File upload with validation
+│   ├── streaks.ts         # Streak calculation logic
+│   ├── timezone.ts        # Timezone-aware date helpers
+│   └── validations.ts     # Zod schemas for all API routes
 └── types/                 # Shared TypeScript types
 ```
