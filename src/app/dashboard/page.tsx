@@ -9,6 +9,7 @@ import { StreakDisplay } from "@/components/dashboard/StreakDisplay";
 import { ManualMealEntry } from "@/components/dashboard/ManualMealEntry";
 import { TemplatePicker } from "@/components/dashboard/TemplatePicker";
 import { WaterTracker } from "@/components/dashboard/WaterTracker";
+import { WeightTracker } from "@/components/dashboard/WeightTracker";
 import { Upload, Camera, LogOut, Settings, BarChart3 } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 
@@ -263,6 +264,12 @@ export default function DashboardPage() {
             <StreakDisplay {...streak} />
           </div>
         )}
+
+        {/* Water & Weight Tracking */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <WaterTracker />
+          <WeightTracker />
+        </div>
       </main>
     </div>
   );
