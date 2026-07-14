@@ -10,10 +10,10 @@ interface MealBubbleProps {
 }
 
 const MEAL_COLORS: Record<string, string> = {
-  breakfast: "bg-amber-100 border-amber-300 text-amber-900",
-  lunch: "bg-green-100 border-green-300 text-green-900",
-  dinner: "bg-blue-100 border-blue-300 text-blue-900",
-  snack: "bg-purple-100 border-purple-300 text-purple-900",
+  breakfast: "bg-[#f2b45c]/15 border-[#f2b45c]/40 text-[#f2b45c]",
+  lunch: "bg-lime/15 border-lime/40 text-lime",
+  dinner: "bg-[#7fd8c4]/15 border-[#7fd8c4]/40 text-[#7fd8c4]",
+  snack: "bg-lavender/15 border-lavender/40 text-lavender",
 };
 
 export function MealBubble({ meal, onClick }: MealBubbleProps) {
@@ -29,7 +29,7 @@ export function MealBubble({ meal, onClick }: MealBubbleProps) {
     <button
       onClick={onClick}
       className={cn(
-        "w-full rounded-lg border text-left transition-all hover:shadow-md cursor-pointer",
+        "w-full rounded-xl border text-left transition-all hover:brightness-110 cursor-pointer",
         size,
         colorClass
       )}

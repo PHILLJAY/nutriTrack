@@ -40,7 +40,7 @@ export function MealSuggestions() {
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Lightbulb className="h-4 w-4 text-yellow-500" />
+            <Lightbulb className="h-4 w-4 text-[#f2b45c]" />
             Meal Suggestions
           </span>
           <Button
@@ -66,7 +66,7 @@ export function MealSuggestions() {
 
         <div className="space-y-3">
           {suggestions.map((s, i) => (
-            <div key={i} className="p-3 rounded-lg border">
+            <div key={i} className="p-3 rounded-2xl border border-border bg-white/[0.02]">
               <div className="font-medium text-sm">{s.name}</div>
               <div className="text-xs text-muted-foreground mt-1">{s.description}</div>
               <div className="flex gap-3 mt-2 text-xs">

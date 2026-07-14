@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionLabel } from "@/components/ui/section-label";
 import { WeekCalendar } from "@/components/dashboard/WeekCalendar";
 import { StreakDisplay } from "@/components/dashboard/StreakDisplay";
 import { ManualMealEntry } from "@/components/dashboard/ManualMealEntry";
@@ -105,7 +106,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse eyebrow">Loading...</div>
       </div>
     );
   }
@@ -113,13 +114,13 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur z-10">
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">NutriTrack</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="wordmark text-lg font-bold text-lime">NutriTrack</h1>
+            <p className="eyebrow mt-0.5">
               Hey, {user.name}
             </p>
           </div>
@@ -197,7 +198,7 @@ export default function DashboardPage() {
       {/* Upload error */}
       {uploadError && (
         <div className="max-w-4xl mx-auto px-4 pt-4">
-          <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-destructive/10 text-destructive text-sm flex items-center justify-between">
             {uploadError}
             <button onClick={() => setUploadError("")} className="ml-2 font-bold">&times;</button>
           </div>
@@ -206,39 +207,27 @@ export default function DashboardPage() {
 
       {/* Main content */}
       <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* Targets overview */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-4 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-orange-500">
-                  {user.targetCalories}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Cal/day
-                </div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-red-500">
-                  {user.targetProtein}g
-                </div>
-                <div className="text-xs text-muted-foreground">Protein</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-blue-500">
-                  {user.targetCarbs}g
-                </div>
-                <div className="text-xs text-muted-foreground">Carbs</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-yellow-500">
-                  {user.targetFat}g
-                </div>
-                <div className="text-xs text-muted-foreground">Fat</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <SectionLabel index={1} label="Today's Targets" className="mb-4" />
+
+        {/* Targets overview — pill stack echoing the reference's stacked badges */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          <div className="flex-1 min-w-[7rem] rounded-full bg-lime px-4 py-2.5 text-center text-lime-foreground">
+            <div className="text-xl font-bold leading-tight">{user.targetCalories}</div>
+            <div className="eyebrow !text-lime-foreground/70">Cal/day</div>
+          </div>
+          <div className="flex-1 min-w-[7rem] rounded-full bg-lavender px-4 py-2.5 text-center text-lavender-foreground">
+            <div className="text-xl font-bold leading-tight">{user.targetProtein}g</div>
+            <div className="eyebrow !text-lavender-foreground/70">Protein</div>
+          </div>
+          <div className="flex-1 min-w-[7rem] rounded-full bg-paper px-4 py-2.5 text-center text-paper-foreground">
+            <div className="text-xl font-bold leading-tight">{user.targetCarbs}g</div>
+            <div className="eyebrow !text-paper-foreground/70">Carbs</div>
+          </div>
+          <div className="flex-1 min-w-[7rem] rounded-full bg-ink px-4 py-2.5 text-center text-ink-foreground border border-white/10">
+            <div className="text-xl font-bold leading-tight">{user.targetFat}g</div>
+            <div className="eyebrow !text-ink-foreground/60">Fat</div>
+          </div>
+        </div>
 
         {/* Discord link hint */}
         {!user.discordId && (
@@ -261,25 +250,30 @@ export default function DashboardPage() {
 
         {/* Streak Tracking */}
         {streak && (
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold mb-3">Your Streak</h2>
+          <div className="mt-8">
+            <SectionLabel index={2} label="Your Streak" className="mb-4" />
             <StreakDisplay {...streak} />
           </div>
         )}
 
         {/* Water & Weight Tracking */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <WaterTracker />
-          <WeightTracker />
+        <div className="mt-8">
+          <SectionLabel index={3} label="Vitals" className="mb-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <WaterTracker />
+            <WeightTracker />
+          </div>
         </div>
 
         {/* AI Meal Suggestions */}
-        <div className="mt-6">
+        <div className="mt-8">
+          <SectionLabel index={4} label="Suggestions" className="mb-4" />
           <MealSuggestions />
         </div>
 
         {/* Week-over-Week Comparison */}
-        <div className="mt-6">
+        <div className="mt-8">
+          <SectionLabel index={5} label="Trends" className="mb-4" />
           <ComparisonChart />
         </div>
       </main>

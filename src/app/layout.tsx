@@ -1,15 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Manrope, Orbitron, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bodyFont = Manrope({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const displayFont = Orbitron({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+const labelFont = Space_Mono({
+  variable: "--font-label",
+  subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -25,9 +32,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${bodyFont.variable} ${displayFont.variable} ${labelFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <div className="app-backdrop" aria-hidden="true" />
+        {children}
+      </body>
     </html>
   );
 }

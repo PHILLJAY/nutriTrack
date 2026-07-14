@@ -51,7 +51,7 @@ function DeltaBadge({ current, previous, unit = "" }: { current: number; previou
 
   const isPositive = diff > 0;
   return (
-    <span className={`text-xs flex items-center gap-0.5 ${isPositive ? "text-red-500" : "text-green-500"}`}>
+    <span className={`text-xs flex items-center gap-0.5 ${isPositive ? "text-destructive" : "text-lime"}`}>
       {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
       {isPositive ? "+" : ""}{diff}{unit} ({isPositive ? "+" : ""}{pct}%)
     </span>

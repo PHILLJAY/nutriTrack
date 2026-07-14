@@ -38,23 +38,23 @@ export function StepGoals({ value, onChange }: StepGoalsProps) {
         </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {GOALS.map((goal) => (
           <button
             key={goal.value}
             onClick={() => onChange(goal.value)}
             className={cn(
-              "text-left p-6 rounded-lg border-2 transition-all",
+              "text-left p-5 rounded-2xl border transition-all",
               value === goal.value
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50"
+                ? "border-transparent bg-lime text-lime-foreground"
+                : "border-border bg-white/[0.03] hover:border-lime/40"
             )}
           >
             <div className="flex items-center gap-3">
               <span className="text-3xl">{goal.icon}</span>
               <div>
                 <div className="font-semibold text-lg">{goal.label}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className={cn("text-sm", value === goal.value ? "text-lime-foreground/70" : "text-muted-foreground")}>
                   {goal.description}
                 </div>
               </div>

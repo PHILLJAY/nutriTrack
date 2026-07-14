@@ -71,7 +71,7 @@ export function WeightTracker() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
-          <Scale className="h-4 w-4 text-purple-500" />
+          <Scale className="h-4 w-4 text-lavender" />
           Weight Tracking
         </CardTitle>
       </CardHeader>
@@ -81,7 +81,7 @@ export function WeightTracker() {
           <div className="flex items-center gap-3">
             <div className="text-3xl font-bold">{latest.weight} kg</div>
             {diff !== 0 && (
-              <div className={`flex items-center gap-1 text-sm ${diff < 0 ? "text-green-500" : "text-red-500"}`}>
+              <div className={`flex items-center gap-1 text-sm ${diff < 0 ? "text-lime" : "text-destructive"}`}>
                 {diff < 0 ? <TrendingDown className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
                 {Math.abs(diff).toFixed(1)} kg
               </div>
@@ -100,7 +100,7 @@ export function WeightTracker() {
               <Line
                 type="monotone"
                 dataKey="weight"
-                stroke="#8b5cf6"
+                stroke="#cbbcf2"
                 strokeWidth={2}
                 dot={{ r: 3 }}
               />

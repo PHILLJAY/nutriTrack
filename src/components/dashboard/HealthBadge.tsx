@@ -10,10 +10,10 @@ interface HealthBadgeProps {
 export function HealthBadge({ rating, size = "md" }: HealthBadgeProps) {
   const color =
     rating >= 80
-      ? "bg-green-500"
+      ? "bg-lime text-lime-foreground"
       : rating >= 50
-      ? "bg-yellow-500"
-      : "bg-red-500";
+      ? "bg-[#f2b45c] text-[#12210a]"
+      : "bg-destructive text-white";
 
   const sizeClasses = {
     sm: "w-8 h-8 text-xs",
@@ -24,7 +24,7 @@ export function HealthBadge({ rating, size = "md" }: HealthBadgeProps) {
   return (
     <div
       className={cn(
-        "rounded-full flex items-center justify-center font-bold text-white",
+        "rounded-full flex items-center justify-center font-bold",
         color,
         sizeClasses[size]
       )}

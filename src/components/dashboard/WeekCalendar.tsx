@@ -107,26 +107,21 @@ export function WeekCalendar({ meals, targets, onUpdate }: WeekCalendarProps) {
               key={key}
               onClick={() => setSelectedDay(day)}
               className={cn(
-                "flex flex-col items-center min-w-[4.5rem] p-2 rounded-lg border-2 transition-all",
+                "flex flex-col items-center min-w-[4.5rem] p-2 rounded-2xl border transition-all",
                 active
-                  ? "border-primary bg-primary/5"
-                  : "border-transparent hover:border-muted-foreground/20",
-                isToday(day) && "ring-1 ring-primary/30"
+                  ? "border-transparent bg-lime text-lime-foreground"
+                  : "border-border bg-white/[0.02] hover:border-lime/40",
+                isToday(day) && !active && "ring-1 ring-lime/40"
               )}
             >
-              <span className="text-xs text-muted-foreground uppercase">
+              <span className={cn("text-xs uppercase", active ? "text-lime-foreground/70" : "text-muted-foreground")}>
                 {format(day, "EEE")}
               </span>
-              <span
-                className={cn(
-                  "text-lg font-bold",
-                  active && "text-primary"
-                )}
-              >
+              <span className="text-lg font-bold">
                 {format(day, "d")}
               </span>
               {dayCals > 0 && (
-                <span className="text-[10px] text-muted-foreground">
+                <span className={cn("text-[10px]", active ? "text-lime-foreground/70" : "text-muted-foreground")}>
                   {dayCals} kcal
                 </span>
               )}

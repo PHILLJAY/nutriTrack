@@ -2,6 +2,13 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface StepBasicsProps {
   data: {
@@ -75,17 +82,19 @@ export function StepBasics({ data, onChange }: StepBasicsProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
-            <select
-              id="gender"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            <Select
               value={data.gender}
-              onChange={(e) => onChange({ gender: e.target.value })}
+              onValueChange={(v) => onChange({ gender: v as string })}
             >
-              <option value="">Select</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
+              <SelectTrigger id="gender" className="w-full">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -116,21 +125,24 @@ export function StepBasics({ data, onChange }: StepBasicsProps) {
 
         <div className="space-y-2">
           <Label htmlFor="timezone">Timezone</Label>
-          <select
-            id="timezone"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          <Select
             value={detectedTz}
-            onChange={(e) => onChange({ timezone: e.target.value })}
+            onValueChange={(v) => onChange({ timezone: v as string })}
           >
-            {COMMON_TIMEZONES.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz.replace(/_/g, " ")}
-              </option>
-            ))}
-            {!COMMON_TIMEZONES.includes(detectedTz) && (
-              <option value={detectedTz}>{detectedTz.replace(/_/g, " ")}</option>
-            )}
-          </select>
+            <SelectTrigger id="timezone" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {COMMON_TIMEZONES.map((tz) => (
+                <SelectItem key={tz} value={tz}>
+                  {tz.replace(/_/g, " ")}
+                </SelectItem>
+              ))}
+              {!COMMON_TIMEZONES.includes(detectedTz) && (
+                <SelectItem value={detectedTz}>{detectedTz.replace(/_/g, " ")}</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>

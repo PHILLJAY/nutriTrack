@@ -24,21 +24,21 @@ export function StreakDisplay({
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-3 text-center">
-            <Flame className={`h-5 w-5 mx-auto mb-1 ${currentStreak > 0 ? "text-orange-500" : "text-muted-foreground"}`} />
+            <Flame className={`h-5 w-5 mx-auto mb-1 ${currentStreak > 0 ? "text-lime" : "text-muted-foreground"}`} />
             <div className="text-2xl font-bold">{currentStreak}</div>
             <div className="text-xs text-muted-foreground">Day Streak</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
-            <Trophy className="h-5 w-5 mx-auto mb-1 text-yellow-500" />
+            <Trophy className="h-5 w-5 mx-auto mb-1 text-[#f2b45c]" />
             <div className="text-2xl font-bold">{longestStreak}</div>
             <div className="text-xs text-muted-foreground">Best Streak</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
-            <Calendar className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+            <Calendar className="h-5 w-5 mx-auto mb-1 text-lavender" />
             <div className="text-2xl font-bold">{totalDaysLogged}</div>
             <div className="text-xs text-muted-foreground">Days Logged</div>
           </CardContent>
@@ -46,7 +46,7 @@ export function StreakDisplay({
       </div>
 
       {/* Today status */}
-      <div className={`text-center text-sm py-2 rounded-lg ${todayLogged ? "bg-green-500/10 text-green-600" : "bg-muted text-muted-foreground"}`}>
+      <div className={`text-center text-sm py-2 rounded-full ${todayLogged ? "bg-lime/15 text-lime" : "bg-muted text-muted-foreground"}`}>
         {todayLogged ? "You've logged today!" : "Log a meal to keep your streak alive"}
       </div>
 
@@ -61,7 +61,7 @@ export function StreakDisplay({
               <div
                 key={day.date}
                 className={`w-[10px] h-[10px] rounded-sm ${
-                  day.count > 0 ? "bg-green-500" : "bg-muted"
+                  day.count > 0 ? "bg-lime" : "bg-muted"
                 }`}
                 title={`${day.date}: ${day.count > 0 ? "Logged" : "No meals"}`}
               />

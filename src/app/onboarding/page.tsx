@@ -98,22 +98,28 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-muted/50">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
+        {/* Wordmark */}
+        <div className="mb-8 text-center">
+          <div className="wordmark text-2xl font-bold text-lime">NutriTrack</div>
+          <div className="eyebrow mt-1">N.{String(step + 1).padStart(3, "0")} — {STEPS[step]}</div>
+        </div>
+
         {/* Progress */}
         <div className="flex gap-2 mb-8">
           {STEPS.map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-colors ${
-                i <= step ? "bg-primary" : "bg-muted"
+              className={`h-1.5 flex-1 rounded-full transition-colors ${
+                i <= step ? "bg-lime" : "bg-white/[0.08]"
               }`}
             />
           ))}
         </div>
 
         {/* Step content */}
-        <div className="mb-8">
+        <div className="glass-panel rounded-2xl p-6 mb-8">
           {STEPS[step] === "basics" && (
             <StepBasics data={data} onChange={updateData} />
           )}
@@ -136,7 +142,7 @@ export default function OnboardingPage() {
 
         {/* Error */}
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          <div className="mb-4 p-3 rounded-xl bg-destructive/10 text-destructive text-sm">
             {error}
           </div>
         )}

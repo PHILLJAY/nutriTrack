@@ -189,8 +189,8 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
               </div>
 
               {/* Calories */}
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-4xl font-bold text-orange-500">
+              <div className="text-center p-4 bg-muted rounded-2xl">
+                <div className="text-4xl font-bold text-lime">
                   {meal.calories}
                 </div>
                 <div className="text-sm text-muted-foreground">calories</div>
@@ -202,21 +202,21 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
                   label="Protein"
                   value={meal.protein}
                   max={100}
-                  color="bg-red-500"
+                  color="bg-lavender"
                   unit="g"
                 />
                 <MacroBar
                   label="Carbs"
                   value={meal.carbs}
                   max={150}
-                  color="bg-blue-500"
+                  color="bg-[#7fd8c4]"
                   unit="g"
                 />
                 <MacroBar
                   label="Fat"
                   value={meal.fat}
                   max={80}
-                  color="bg-yellow-500"
+                  color="bg-[#f2b45c]"
                   unit="g"
                 />
               </div>

@@ -7,6 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { SectionLabel } from "@/components/ui/section-label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, CheckCircle, LinkIcon, Globe, Scale, Download } from "lucide-react";
 import type { UserProfile } from "@/types";
 
@@ -75,7 +83,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse eyebrow">Loading...</div>
       </div>
     );
   }
@@ -83,8 +91,8 @@ export default function SettingsPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur z-10">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Button
             variant="ghost"
@@ -93,11 +101,12 @@ export default function SettingsPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-xl font-bold">Settings</h1>
+          <h1 className="wordmark text-lg font-bold">Settings</h1>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        <SectionLabel index={1} label="Account & Preferences" />
         {/* Discord Linking */}
         <Card>
           <CardHeader>
@@ -131,7 +140,7 @@ export default function SettingsPage() {
                 </Button>
               </div>
               {saved && (
-                <p className="text-sm text-green-600 flex items-center gap-1">
+                <p className="text-sm text-lime flex items-center gap-1">
                   <CheckCircle className="h-4 w-4" />
                   Discord account linked!
                 </p>
@@ -160,30 +169,22 @@ export default function SettingsPage() {
             <CardTitle>Your Targets</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-4 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-orange-500">
-                  {user.targetCalories}
-                </div>
-                <div className="text-xs text-muted-foreground">Cal/day</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="rounded-full bg-lime px-3 py-2 text-center text-lime-foreground">
+                <div className="text-lg font-bold leading-tight">{user.targetCalories}</div>
+                <div className="eyebrow !text-lime-foreground/70">Cal/day</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-red-500">
-                  {user.targetProtein}g
-                </div>
-                <div className="text-xs text-muted-foreground">Protein</div>
+              <div className="rounded-full bg-lavender px-3 py-2 text-center text-lavender-foreground">
+                <div className="text-lg font-bold leading-tight">{user.targetProtein}g</div>
+                <div className="eyebrow !text-lavender-foreground/70">Protein</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-blue-500">
-                  {user.targetCarbs}g
-                </div>
-                <div className="text-xs text-muted-foreground">Carbs</div>
+              <div className="rounded-full bg-paper px-3 py-2 text-center text-paper-foreground">
+                <div className="text-lg font-bold leading-tight">{user.targetCarbs}g</div>
+                <div className="eyebrow !text-paper-foreground/70">Carbs</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-yellow-500">
-                  {user.targetFat}g
-                </div>
-                <div className="text-xs text-muted-foreground">Fat</div>
+              <div className="rounded-full bg-ink px-3 py-2 text-center text-ink-foreground border border-white/10">
+                <div className="text-lg font-bold leading-tight">{user.targetFat}g</div>
+                <div className="eyebrow !text-ink-foreground/60">Fat</div>
               </div>
             </div>
           </CardContent>
@@ -199,22 +200,23 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <select
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
-              >
-                {[
-                  "America/New_York", "America/Chicago", "America/Denver",
-                  "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
-                  "America/Toronto", "America/Vancouver",
-                  "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Moscow",
-                  "Asia/Dubai", "Asia/Kolkata", "Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul",
-                  "Australia/Sydney", "Australia/Perth", "Pacific/Auckland",
-                ].map((tz) => (
-                  <option key={tz} value={tz}>{tz.replace(/_/g, " ")}</option>
-                ))}
-              </select>
+              <Select value={timezone} onValueChange={(v) => setTimezone(v as string)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    "America/New_York", "America/Chicago", "America/Denver",
+                    "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
+                    "America/Toronto", "America/Vancouver",
+                    "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Moscow",
+                    "Asia/Dubai", "Asia/Kolkata", "Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul",
+                    "Australia/Sydney", "Australia/Perth", "Pacific/Auckland",
+                  ].map((tz) => (
+                    <SelectItem key={tz} value={tz}>{tz.replace(/_/g, " ")}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button
                 size="sm"
                 onClick={async () => {

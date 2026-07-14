@@ -84,41 +84,23 @@ export function StepSummary({ data, targets }: StepSummaryProps) {
       </Card>
 
       {targets && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-orange-500">
-                {targets.targetCalories}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Calories/day
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-red-500">
-                {targets.targetProtein}g
-              </div>
-              <div className="text-sm text-muted-foreground">Protein</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-blue-500">
-                {targets.targetCarbs}g
-              </div>
-              <div className="text-sm text-muted-foreground">Carbs</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-yellow-500">
-                {targets.targetFat}g
-              </div>
-              <div className="text-sm text-muted-foreground">Fat</div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="rounded-full bg-lime px-4 py-3 text-center text-lime-foreground">
+            <div className="text-2xl font-bold leading-tight">{targets.targetCalories}</div>
+            <div className="eyebrow !text-lime-foreground/70">Calories/day</div>
+          </div>
+          <div className="rounded-full bg-lavender px-4 py-3 text-center text-lavender-foreground">
+            <div className="text-2xl font-bold leading-tight">{targets.targetProtein}g</div>
+            <div className="eyebrow !text-lavender-foreground/70">Protein</div>
+          </div>
+          <div className="rounded-full bg-paper px-4 py-3 text-center text-paper-foreground">
+            <div className="text-2xl font-bold leading-tight">{targets.targetCarbs}g</div>
+            <div className="eyebrow !text-paper-foreground/70">Carbs</div>
+          </div>
+          <div className="rounded-full bg-ink px-4 py-3 text-center text-ink-foreground border border-white/10">
+            <div className="text-2xl font-bold leading-tight">{targets.targetFat}g</div>
+            <div className="eyebrow !text-ink-foreground/60">Fat</div>
+          </div>
         </div>
       )}
     </div>

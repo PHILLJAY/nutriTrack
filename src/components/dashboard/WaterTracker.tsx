@@ -43,7 +43,7 @@ export function WaterTracker() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
-          <Droplets className="h-4 w-4 text-blue-500" />
+          <Droplets className="h-4 w-4 text-[#7fd8c4]" />
           Water Intake
         </CardTitle>
       </CardHeader>
@@ -65,7 +65,7 @@ export function WaterTracker() {
             </div>
             <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
               <div
-                className="h-full rounded-full bg-blue-500 transition-all"
+                className="h-full rounded-full bg-[#7fd8c4] transition-all"
                 style={{ width: `${pct}%` }}
               />
             </div>

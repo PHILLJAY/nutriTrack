@@ -14,7 +14,7 @@ interface DailySummaryProps {
   };
 }
 
-const COLORS = ["#ef4444", "#3b82f6", "#eab308"];
+const COLORS = ["#cbbcf2", "#7fd8c4", "#f2b45c"];
 
 export function DailySummary({ meals, targets }: DailySummaryProps) {
   const totals = meals.reduce(
@@ -54,7 +54,7 @@ export function DailySummary({ meals, targets }: DailySummaryProps) {
         <div className="h-3 w-full rounded-full bg-muted overflow-hidden mb-4">
           <div
             className={`h-full rounded-full transition-all ${
-              caloriePct > 100 ? "bg-red-500" : "bg-orange-500"
+              caloriePct > 100 ? "bg-destructive" : "bg-lime"
             }`}
             style={{ width: `${Math.min(100, caloriePct)}%` }}
           />
