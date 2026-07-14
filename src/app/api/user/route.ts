@@ -38,20 +38,32 @@ export async function PATCH(request: NextRequest) {
     Object.entries(parsed.data).filter(([, v]) => v !== undefined)
   );
 
-  // If basic stats changed, recalculate targets
+  // If basic stats or macro ratios changed, recalculate targets
+  const needsRecalc =
+    updates.weight || updates.height || updates.age || updates.activityLevel || updates.goal ||
+    updates.targetProteinPct !== undefined || updates.targetCarbsPct !== undefined || updates.targetFatPct !== undefined;
+
   let targetUpdates = {};
-  if (updates.weight || updates.height || updates.age || updates.activityLevel || updates.goal) {
+  if (needsRecalc) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user) {
-      targetUpdates = calculateTargets({
-        name: user.name,
-        age: (updates.age as number) ?? user.age,
-        gender: (updates.gender as string) ?? user.gender,
-        height: (updates.height as number) ?? user.height,
-        weight: (updates.weight as number) ?? user.weight,
-        activityLevel: (updates.activityLevel as string) ?? user.activityLevel,
-        goal: (updates.goal as string) ?? user.goal,
-      });
+      const customRatios = {
+        proteinPct: (updates.targetProteinPct as number) ?? user.targetProteinPct,
+        carbsPct: (updates.targetCarbsPct as number) ?? user.targetCarbsPct,
+        fatPct: (updates.targetFatPct as number) ?? user.targetFatPct,
+      };
+      targetUpdates = calculateTargets(
+        {
+          name: user.name,
+          age: (updates.age as number) ?? user.age,
+          gender: (updates.gender as string) ?? user.gender,
+          height: (updates.height as number) ?? user.height,
+          weight: (updates.weight as number) ?? user.weight,
+          activityLevel: (updates.activityLevel as string) ?? user.activityLevel,
+          goal: (updates.goal as string) ?? user.goal,
+        },
+        customRatios
+      );
     }
   }
 

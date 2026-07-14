@@ -30,16 +30,23 @@ export function calculateTDEE(bmr: number, activityLevel: string): number {
   return bmr * (ACTIVITY_MULTIPLIERS[activityLevel] || 1.2);
 }
 
-export function calculateTargets(data: OnboardingData) {
+export function calculateTargets(
+  data: OnboardingData,
+  customRatios?: { proteinPct?: number | null; carbsPct?: number | null; fatPct?: number | null }
+) {
   const bmr = calculateBMR(data.weight, data.height, data.age, data.gender);
   const tdee = calculateTDEE(bmr, data.activityLevel);
   const adjustment = GOAL_CALORIE_ADJUSTMENTS[data.goal] || 0;
   const targetCalories = Math.round(tdee + adjustment);
 
-  // 30% protein, 40% carbs, 30% fat
-  const targetProtein = Math.round((targetCalories * 0.3) / 4); // 4 cal per gram
-  const targetCarbs = Math.round((targetCalories * 0.4) / 4);
-  const targetFat = Math.round((targetCalories * 0.3) / 9); // 9 cal per gram
+  // Use custom ratios if provided, otherwise default 30/40/30
+  const proteinPct = customRatios?.proteinPct ?? 30;
+  const carbsPct = customRatios?.carbsPct ?? 40;
+  const fatPct = customRatios?.fatPct ?? 30;
+
+  const targetProtein = Math.round((targetCalories * (proteinPct / 100)) / 4);
+  const targetCarbs = Math.round((targetCalories * (carbsPct / 100)) / 4);
+  const targetFat = Math.round((targetCalories * (fatPct / 100)) / 9);
 
   return { targetCalories, targetProtein, targetCarbs, targetFat };
 }

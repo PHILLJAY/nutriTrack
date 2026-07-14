@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, CheckCircle, LinkIcon, Globe } from "lucide-react";
+import { ArrowLeft, CheckCircle, LinkIcon, Globe, Scale } from "lucide-react";
 import type { UserProfile } from "@/types";
 
 export default function SettingsPage() {
@@ -15,6 +15,9 @@ export default function SettingsPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [discordId, setDiscordId] = useState("");
   const [timezone, setTimezone] = useState("");
+  const [proteinPct, setProteinPct] = useState(30);
+  const [carbsPct, setCarbsPct] = useState(40);
+  const [fatPct, setFatPct] = useState(30);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +37,9 @@ export default function SettingsPage() {
           setUser(data.user);
           setDiscordId(data.user.discordId || "");
           setTimezone(data.user.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+          setProteinPct(data.user.targetProteinPct ?? 30);
+          setCarbsPct(data.user.targetCarbsPct ?? 40);
+          setFatPct(data.user.targetFatPct ?? 30);
         }
       })
       .catch(() => setError("Failed to load profile"))
@@ -224,6 +230,115 @@ export default function SettingsPage() {
               <p className="text-xs text-muted-foreground">
                 Times in meal logs, calendar, and Discord bot will use this timezone.
               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Custom Macro Ratios */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Scale className="h-5 w-5" />
+              Macro Ratios
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Customize how your daily calories are split between protein, carbs, and fat. Must add up to 100%.
+              </p>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="protein-pct">Protein %</Label>
+                  <Input
+                    id="protein-pct"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={100}
+                    value={proteinPct}
+                    onChange={(e) => setProteinPct(parseInt(e.target.value) || 0)}
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    {Math.round(((user?.targetCalories || 2000) * proteinPct / 100) / 4)}g/day
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="carbs-pct">Carbs %</Label>
+                  <Input
+                    id="carbs-pct"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={100}
+                    value={carbsPct}
+                    onChange={(e) => setCarbsPct(parseInt(e.target.value) || 0)}
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    {Math.round(((user?.targetCalories || 2000) * carbsPct / 100) / 4)}g/day
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fat-pct">Fat %</Label>
+                  <Input
+                    id="fat-pct"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={100}
+                    value={fatPct}
+                    onChange={(e) => setFatPct(parseInt(e.target.value) || 0)}
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    {Math.round(((user?.targetCalories || 2000) * fatPct / 100) / 9)}g/day
+                  </div>
+                </div>
+              </div>
+
+              {proteinPct + carbsPct + fatPct !== 100 && (
+                <p className="text-sm text-destructive">
+                  Ratios must add up to 100% (currently {proteinPct + carbsPct + fatPct}%)
+                </p>
+              )}
+
+              <Button
+                size="sm"
+                disabled={proteinPct + carbsPct + fatPct !== 100}
+                onClick={async () => {
+                  const res = await fetch("/api/user", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      targetProteinPct: proteinPct,
+                      targetCarbsPct: carbsPct,
+                      targetFatPct: fatPct,
+                    }),
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    setUser(data.user);
+                  }
+                }}
+              >
+                Save Macro Ratios
+              </Button>
+
+              {/* Presets */}
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" variant="outline" onClick={() => { setProteinPct(30); setCarbsPct(40); setFatPct(30); }}>
+                  Balanced
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { setProteinPct(40); setCarbsPct(30); setFatPct(30); }}>
+                  High Protein
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { setProteinPct(25); setCarbsPct(5); setFatPct(70); }}>
+                  Keto
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { setProteinPct(30); setCarbsPct(50); setFatPct(20); }}>
+                  Low Fat
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

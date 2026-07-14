@@ -58,4 +58,7 @@ export const userUpdateSchema = z.object({
   activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]).optional(),
   goal: z.enum(["lose", "maintain", "gain"]).optional(),
   timezone: z.string().optional(),
+  targetProteinPct: z.number().min(0).max(100).optional(),
+  targetCarbsPct: z.number().min(0).max(100).optional(),
+  targetFatPct: z.number().min(0).max(100).optional(),
 });
