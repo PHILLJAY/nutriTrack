@@ -11,6 +11,7 @@ import { TemplatePicker } from "@/components/dashboard/TemplatePicker";
 import { WaterTracker } from "@/components/dashboard/WaterTracker";
 import { WeightTracker } from "@/components/dashboard/WeightTracker";
 import { MealSuggestions } from "@/components/dashboard/MealSuggestions";
+import { ComparisonChart } from "@/components/dashboard/ComparisonChart";
 import { Upload, Camera, LogOut, Settings, BarChart3 } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 
@@ -275,6 +276,11 @@ export default function DashboardPage() {
         {/* AI Meal Suggestions */}
         <div className="mt-6">
           <MealSuggestions />
+        </div>
+
+        {/* Week-over-Week Comparison */}
+        <div className="mt-6">
+          <ComparisonChart />
         </div>
       </main>
     </div>
