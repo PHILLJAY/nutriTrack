@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Create persistent directories
 mkdir -p /data/db /data/uploads
@@ -7,7 +8,7 @@ mkdir -p /data/db /data/uploads
 rm -rf /app/public/uploads
 ln -s /data/uploads /app/public/uploads
 
-# Run migrations against the persistent database
+# Run migrations against the persistent database (halt on failure)
 DATABASE_URL="file:/data/db/dev.db" npx prisma migrate deploy
 
 # Start the Discord bot in the background (non-fatal if it fails)

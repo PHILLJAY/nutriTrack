@@ -33,25 +33,41 @@ const MEAL_TYPE_LABELS: Record<string, string> = {
 
 export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
   const [editing, setEditing] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSave = async (updates: Partial<MealData>) => {
-    const res = await fetch(`/api/meals/${meal.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    if (res.ok) {
-      setEditing(false);
-      onUpdate();
+    setError("");
+    try {
+      const res = await fetch(`/api/meals/${meal.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (res.ok) {
+        setEditing(false);
+        onUpdate();
+      } else {
+        const err = await res.json();
+        setError(err.error || "Failed to save changes");
+      }
+    } catch {
+      setError("Network error. Please try again.");
     }
   };
 
   const handleDelete = async () => {
     if (!confirm("Delete this meal?")) return;
-    const res = await fetch(`/api/meals/${meal.id}`, { method: "DELETE" });
-    if (res.ok) {
-      onClose();
-      onUpdate();
+    setError("");
+    try {
+      const res = await fetch(`/api/meals/${meal.id}`, { method: "DELETE" });
+      if (res.ok) {
+        onClose();
+        onUpdate();
+      } else {
+        setError("Failed to delete meal");
+      }
+    } catch {
+      setError("Network error. Please try again.");
     }
   };
 
@@ -85,6 +101,14 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
+          {/* Error */}
+          {error && (
+            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center justify-between">
+              {error}
+              <button onClick={() => setError("")} className="ml-2 font-bold">&times;</button>
+            </div>
+          )}
+
           {/* Image */}
           {meal.imageUrl && (
             <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">

@@ -40,13 +40,16 @@ export async function analyzeMealImage(
   ]);
 
   const text = result.response.text();
-  // Extract JSON from response (handle potential markdown wrapping)
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error("Failed to parse Gemini response as JSON");
   }
 
-  return JSON.parse(jsonMatch[0]) as GeminiMealAnalysis;
+  try {
+    return JSON.parse(jsonMatch[0]) as GeminiMealAnalysis;
+  } catch {
+    throw new Error("Gemini returned malformed JSON");
+  }
 }
 
 export async function nlpEditMeal(
@@ -76,5 +79,9 @@ Fields available: name, calories, protein, carbs, fat, fiber, sugar, sodium, hea
     throw new Error("Failed to parse NLP edit response");
   }
 
-  return JSON.parse(jsonMatch[0]) as Partial<GeminiMealAnalysis>;
+  try {
+    return JSON.parse(jsonMatch[0]) as Partial<GeminiMealAnalysis>;
+  } catch {
+    throw new Error("Gemini returned malformed JSON for NLP edit");
+  }
 }

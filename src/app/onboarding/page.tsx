@@ -14,6 +14,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [data, setData] = useState({
     name: "",
     age: "",
@@ -63,6 +64,7 @@ export default function OnboardingPage() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/onboarding", {
         method: "POST",
@@ -82,9 +84,12 @@ export default function OnboardingPage() {
         const result = await res.json();
         setTargets(result.targets);
         router.push("/dashboard");
+      } else {
+        const err = await res.json();
+        setError(err.error || "Something went wrong. Please check your inputs.");
       }
-    } catch (error) {
-      console.error("Onboarding failed:", error);
+    } catch {
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -126,6 +131,13 @@ export default function OnboardingPage() {
             <StepSummary data={data} targets={targets} />
           )}
         </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+            {error}
+          </div>
+        )}
 
         {/* Navigation */}
         <div className="flex gap-3">

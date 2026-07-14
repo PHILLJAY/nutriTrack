@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [meals, setMeals] = useState<MealData[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const fetchData = useCallback(async () => {
     try {
@@ -57,6 +58,7 @@ export default function DashboardPage() {
     if (!file) return;
 
     setUploading(true);
+    setUploadError("");
     try {
       const formData = new FormData();
       formData.append("image", file);
@@ -68,9 +70,12 @@ export default function DashboardPage() {
 
       if (res.ok) {
         await fetchData();
+      } else {
+        const err = await res.json();
+        setUploadError(err.error || "Failed to analyze image");
       }
-    } catch (error) {
-      console.error("Upload failed:", error);
+    } catch {
+      setUploadError("Network error. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -142,6 +147,16 @@ export default function DashboardPage() {
           </div>
         </div>
       </header>
+
+      {/* Upload error */}
+      {uploadError && (
+        <div className="max-w-4xl mx-auto px-4 pt-4">
+          <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center justify-between">
+            {uploadError}
+            <button onClick={() => setUploadError("")} className="ml-2 font-bold">&times;</button>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <main className="max-w-4xl mx-auto px-4 py-6">

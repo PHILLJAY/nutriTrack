@@ -8,13 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, CheckCircle, LinkIcon } from "lucide-react";
+import type { UserProfile } from "@/types";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<Record<string, unknown> | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [discordId, setDiscordId] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,6 +34,7 @@ export default function SettingsPage() {
           setDiscordId(data.user.discordId || "");
         }
       })
+      .catch(() => setError("Failed to load profile"))
       .finally(() => setLoading(false));
   }, [router]);
 
@@ -39,6 +42,7 @@ export default function SettingsPage() {
     if (!discordId.trim()) return;
     setSaving(true);
     setSaved(false);
+    setError("");
     try {
       const res = await fetch("/api/discord", {
         method: "POST",
@@ -49,7 +53,12 @@ export default function SettingsPage() {
         setSaved(true);
         const data = await res.json();
         setUser(data.user);
+      } else {
+        const err = await res.json();
+        setError(err.error || "Failed to link Discord account");
       }
+    } catch {
+      setError("Network error. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -146,25 +155,25 @@ export default function SettingsPage() {
             <div className="grid grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-orange-500">
-                  {(user as Record<string, unknown>).targetCalories as number}
+                  {user.targetCalories}
                 </div>
                 <div className="text-xs text-muted-foreground">Cal/day</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-red-500">
-                  {(user as Record<string, unknown>).targetProtein as number}g
+                  {user.targetProtein}g
                 </div>
                 <div className="text-xs text-muted-foreground">Protein</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-blue-500">
-                  {(user as Record<string, unknown>).targetCarbs as number}g
+                  {user.targetCarbs}g
                 </div>
                 <div className="text-xs text-muted-foreground">Carbs</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-yellow-500">
-                  {(user as Record<string, unknown>).targetFat as number}g
+                  {user.targetFat}g
                 </div>
                 <div className="text-xs text-muted-foreground">Fat</div>
               </div>
