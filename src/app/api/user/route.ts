@@ -25,26 +25,36 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json();
 
+  // Whitelist allowed fields to prevent mass assignment
+  const allowedFields = [
+    "name", "age", "gender", "height", "weight",
+    "activityLevel", "goal",
+  ] as const;
+  const updates: Record<string, unknown> = {};
+  for (const key of allowedFields) {
+    if (key in body) updates[key] = body[key];
+  }
+
   // If basic stats changed, recalculate targets
   let targetUpdates = {};
-  if (body.weight || body.height || body.age || body.activityLevel || body.goal) {
+  if (updates.weight || updates.height || updates.age || updates.activityLevel || updates.goal) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user) {
       targetUpdates = calculateTargets({
         name: user.name,
-        age: body.age ?? user.age,
-        gender: body.gender ?? user.gender,
-        height: body.height ?? user.height,
-        weight: body.weight ?? user.weight,
-        activityLevel: body.activityLevel ?? user.activityLevel,
-        goal: body.goal ?? user.goal,
+        age: (updates.age as number) ?? user.age,
+        gender: (updates.gender as string) ?? user.gender,
+        height: (updates.height as number) ?? user.height,
+        weight: (updates.weight as number) ?? user.weight,
+        activityLevel: (updates.activityLevel as string) ?? user.activityLevel,
+        goal: (updates.goal as string) ?? user.goal,
       });
     }
   }
 
   const user = await prisma.user.update({
     where: { id: userId },
-    data: { ...body, ...targetUpdates },
+    data: { ...updates, ...targetUpdates },
   });
 
   return Response.json({ user });

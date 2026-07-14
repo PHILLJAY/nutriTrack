@@ -23,20 +23,29 @@ export async function PATCH(
     return Response.json({ error: "Meal not found" }, { status: 404 });
   }
 
+  // Whitelist allowed fields to prevent mass assignment
+  const allowedFields = [
+    "name", "calories", "protein", "carbs", "fat",
+    "fiber", "sugar", "sodium", "mealType", "notes",
+  ] as const;
+  const updates: Record<string, unknown> = {};
+  for (const key of allowedFields) {
+    if (key in body) updates[key] = body[key];
+  }
+  if (body.eatenAt) updates.eatenAt = new Date(body.eatenAt);
+
   // Recalculate health rating if nutrition changed
-  const updatedData = { ...existing, ...body };
-  const healthRating =
-    body.calories || body.protein || body.carbs || body.fat
-      ? calculateHealthRating(updatedData)
-      : existing.healthRating;
+  const updatedData = { ...existing, ...updates };
+  const nutritionChanged = ["calories", "protein", "carbs", "fat"].some(
+    (k) => k in updates
+  );
+  const healthRating = nutritionChanged
+    ? calculateHealthRating(updatedData)
+    : existing.healthRating;
 
   const meal = await prisma.meal.update({
     where: { id },
-    data: {
-      ...body,
-      healthRating,
-      eatenAt: body.eatenAt ? new Date(body.eatenAt) : undefined,
-    },
+    data: { ...updates, healthRating },
     include: { image: true },
   });
 
