@@ -1,11 +1,11 @@
 #!/bin/sh
 
+# Create persistent directories
+mkdir -p /data/db /data/uploads
+
 # Symlink uploads to persistent storage
 rm -rf /app/public/uploads
 ln -s /data/uploads /app/public/uploads
-
-# Ensure persistent DB directory exists
-mkdir -p /data/db
 
 # Run migrations against the persistent database
 DATABASE_URL="file:/data/db/dev.db" npx prisma migrate deploy
