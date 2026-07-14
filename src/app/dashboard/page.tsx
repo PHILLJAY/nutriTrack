@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendar } from "@/components/dashboard/WeekCalendar";
 import { StreakDisplay } from "@/components/dashboard/StreakDisplay";
 import { ManualMealEntry } from "@/components/dashboard/ManualMealEntry";
+import { TemplatePicker } from "@/components/dashboard/TemplatePicker";
 import { Upload, Camera, LogOut, Settings, BarChart3 } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 
@@ -120,6 +121,23 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <ManualMealEntry onSuccess={fetchData} />
+            <TemplatePicker
+              onSelect={async (template) => {
+                await fetch("/api/meals", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    name: template.name,
+                    calories: template.calories,
+                    protein: template.protein,
+                    carbs: template.carbs,
+                    fat: template.fat,
+                    mealType: template.mealType,
+                  }),
+                });
+                fetchData();
+              }}
+            />
             <div>
               <input
                 id="meal-upload"

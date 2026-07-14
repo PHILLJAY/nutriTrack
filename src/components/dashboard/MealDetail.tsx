@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Bookmark } from "lucide-react";
 import { HealthBadge } from "./HealthBadge";
 import { MacroEditor } from "./MacroEditor";
 import { NLPEditInput } from "./NLPEditInput";
@@ -34,6 +34,31 @@ const MEAL_TYPE_LABELS: Record<string, string> = {
 export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
+  const [savingTemplate, setSavingTemplate] = useState(false);
+
+  const handleSaveAsTemplate = async () => {
+    setSavingTemplate(true);
+    try {
+      await fetch("/api/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: meal.name,
+          calories: meal.calories,
+          protein: meal.protein,
+          carbs: meal.carbs,
+          fat: meal.fat,
+          fiber: meal.fiber,
+          sugar: meal.sugar,
+          sodium: meal.sodium,
+          mealType: meal.mealType,
+          notes: meal.notes,
+        }),
+      });
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
 
   const handleSave = async (updates: Partial<MealData>) => {
     setError("");
@@ -80,6 +105,15 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
             <div className="flex gap-2">
               {!editing && (
                 <>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleSaveAsTemplate}
+                    disabled={savingTemplate}
+                    title="Save as template"
+                  >
+                    <Bookmark className="h-4 w-4" />
+                  </Button>
                   <Button
                     size="icon"
                     variant="ghost"
