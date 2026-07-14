@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, CheckCircle, LinkIcon, Globe, Scale } from "lucide-react";
+import { ArrowLeft, CheckCircle, LinkIcon, Globe, Scale, Download } from "lucide-react";
 import type { UserProfile } from "@/types";
 
 export default function SettingsPage() {
@@ -339,6 +339,35 @@ export default function SettingsPage() {
                   Low Fat
                 </Button>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Export Data */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Export Data
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Download your meal history and nutrition data.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => window.open("/api/export?format=csv", "_blank")}
+              >
+                Download CSV
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.open("/api/export?format=json", "_blank")}
+              >
+                Download JSON
+              </Button>
             </div>
           </CardContent>
         </Card>
