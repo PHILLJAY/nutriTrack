@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { calculateTargets } from "@/lib/nutrition";
+import { userUpdateSchema } from "@/lib/validations";
 
 export async function GET() {
   const userId = await getSession();
@@ -25,15 +26,17 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json();
 
-  // Whitelist allowed fields to prevent mass assignment
-  const allowedFields = [
-    "name", "age", "gender", "height", "weight",
-    "activityLevel", "goal",
-  ] as const;
-  const updates: Record<string, unknown> = {};
-  for (const key of allowedFields) {
-    if (key in body) updates[key] = body[key];
+  const parsed = userUpdateSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid input", details: parsed.error.flatten() },
+      { status: 400 }
+    );
   }
+
+  const updates = Object.fromEntries(
+    Object.entries(parsed.data).filter(([, v]) => v !== undefined)
+  );
 
   // If basic stats changed, recalculate targets
   let targetUpdates = {};

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { discordLinkSchema } from "@/lib/validations";
 
 export async function POST(request: NextRequest) {
   const userId = await getSession();
@@ -8,12 +9,18 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { discordId } = await request.json();
-  if (!discordId) {
-    return Response.json({ error: "discordId required" }, { status: 400 });
+  const body = await request.json();
+  const parsed = discordLinkSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid input", details: parsed.error.flatten() },
+      { status: 400 }
+    );
   }
 
-  // Check if this discord ID is already linked to another user
+  const { discordId } = parsed.data;
+
   const existing = await prisma.user.findUnique({
     where: { discordId },
   });

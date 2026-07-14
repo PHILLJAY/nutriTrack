@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { nlpEditMeal } from "@/lib/gemini";
 import { calculateHealthRating } from "@/lib/health-rating";
+import { nlpEditSchema } from "@/lib/validations";
 
 export async function POST(request: NextRequest) {
   const userId = await getSession();
@@ -10,13 +11,17 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { mealId, instruction } = await request.json();
-  if (!mealId || !instruction) {
+  const body = await request.json();
+  const parsed = nlpEditSchema.safeParse(body);
+
+  if (!parsed.success) {
     return Response.json(
-      { error: "mealId and instruction required" },
+      { error: "Invalid input", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
+
+  const { mealId, instruction } = parsed.data;
 
   const meal = await prisma.meal.findFirst({
     where: { id: mealId, userId },
@@ -25,20 +30,23 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Meal not found" }, { status: 404 });
   }
 
-  const updates = await nlpEditMeal(meal, instruction);
+  try {
+    const updates = await nlpEditMeal(meal, instruction);
 
-  // Recalculate health rating if nutrition changed
-  const updatedData = { ...meal, ...updates };
-  const healthRating = calculateHealthRating(updatedData);
+    const updatedData = { ...meal, ...updates };
+    const healthRating = calculateHealthRating(updatedData);
 
-  const updatedMeal = await prisma.meal.update({
-    where: { id: mealId },
-    data: {
-      ...updates,
-      healthRating,
-    },
-    include: { image: true },
-  });
+    const updatedMeal = await prisma.meal.update({
+      where: { id: mealId },
+      data: { ...updates, healthRating },
+      include: { image: true },
+    });
 
-  return Response.json({ meal: updatedMeal, updates });
+    return Response.json({ meal: updatedMeal, updates });
+  } catch {
+    return Response.json(
+      { error: "Failed to process natural language edit" },
+      { status: 500 }
+    );
+  }
 }

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { calculateHealthRating } from "@/lib/health-rating";
+import { mealCreateSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const userId = await getSession();
@@ -37,25 +38,35 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const healthRating = calculateHealthRating(body);
+  const parsed = mealCreateSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid input", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
+  const healthRating = calculateHealthRating(data);
 
   const meal = await prisma.meal.create({
     data: {
       userId,
-      name: body.name,
-      calories: body.calories,
-      protein: body.protein,
-      carbs: body.carbs,
-      fat: body.fat,
-      fiber: body.fiber ?? null,
-      sugar: body.sugar ?? null,
-      sodium: body.sodium ?? null,
+      name: data.name,
+      calories: data.calories,
+      protein: data.protein,
+      carbs: data.carbs,
+      fat: data.fat,
+      fiber: data.fiber ?? null,
+      sugar: data.sugar ?? null,
+      sodium: data.sodium ?? null,
       healthRating,
-      mealType: body.mealType || "snack",
-      eatenAt: body.eatenAt ? new Date(body.eatenAt) : new Date(),
-      notes: body.notes ?? null,
+      mealType: data.mealType || "snack",
+      eatenAt: data.eatenAt ? new Date(data.eatenAt) : new Date(),
+      notes: data.notes ?? null,
       source: "web",
-      imageId: body.imageId ?? null,
+      imageId: data.imageId ?? null,
     },
     include: { image: true },
   });

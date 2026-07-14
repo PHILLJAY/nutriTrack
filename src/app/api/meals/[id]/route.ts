@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { calculateHealthRating } from "@/lib/health-rating";
+import { mealUpdateSchema } from "@/lib/validations";
 
 export async function PATCH(
   request: NextRequest,
@@ -15,6 +16,14 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
+  const parsed = mealUpdateSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid input", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
   // Verify meal belongs to user
   const existing = await prisma.meal.findFirst({
     where: { id, userId },
@@ -23,16 +32,11 @@ export async function PATCH(
     return Response.json({ error: "Meal not found" }, { status: 404 });
   }
 
-  // Whitelist allowed fields to prevent mass assignment
-  const allowedFields = [
-    "name", "calories", "protein", "carbs", "fat",
-    "fiber", "sugar", "sodium", "mealType", "notes",
-  ] as const;
+  // Use validated data only
   const updates: Record<string, unknown> = {};
-  for (const key of allowedFields) {
-    if (key in body) updates[key] = body[key];
+  for (const [key, value] of Object.entries(parsed.data)) {
+    if (value !== undefined) updates[key] = value;
   }
-  if (body.eatenAt) updates.eatenAt = new Date(body.eatenAt);
 
   // Recalculate health rating if nutrition changed
   const updatedData = { ...existing, ...updates };

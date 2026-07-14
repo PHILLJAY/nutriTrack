@@ -2,11 +2,20 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { calculateTargets } from "@/lib/nutrition";
 import { setSession } from "@/lib/session";
-import type { OnboardingData } from "@/types";
+import { onboardingSchema } from "@/lib/validations";
 
 export async function POST(request: NextRequest) {
-  const data: OnboardingData = await request.json();
+  const body = await request.json();
+  const parsed = onboardingSchema.safeParse(body);
 
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid input", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
   const targets = calculateTargets(data);
 
   const user = await prisma.user.create({
