@@ -43,7 +43,7 @@ export function NLPEditInput({ mealId, onUpdate }: NLPEditInputProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <div className="relative flex-1">
           <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -51,13 +51,13 @@ export function NLPEditInput({ mealId, onUpdate }: NLPEditInputProps) {
             value={instruction}
             onChange={(e) => setInstruction(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            className="pl-9"
+            className="pl-9 h-10"
           />
         </div>
         <Button
-          size="sm"
           onClick={handleSubmit}
           disabled={loading || !instruction.trim()}
+          className="h-10 px-4"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

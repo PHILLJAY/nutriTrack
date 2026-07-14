@@ -98,79 +98,96 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent className="overflow-y-auto w-full sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="flex items-center justify-between">
-            <span>{meal.name}</span>
-            <div className="flex gap-2">
-              {!editing && (
-                <>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleSaveAsTemplate}
-                    disabled={savingTemplate}
-                    title="Save as template"
-                  >
-                    <Bookmark className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setEditing(true)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleDelete}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </SheetTitle>
-        </SheetHeader>
+      <SheetContent className="overflow-y-auto w-full sm:max-w-lg p-0">
+        {/* Image — full bleed at top */}
+        {meal.imageUrl && (
+          <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+            <Image
+              src={meal.imageUrl}
+              alt={meal.name}
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          </div>
+        )}
 
-        <div className="mt-6 space-y-6">
+        <div className="px-6 pb-8 relative">
+          {/* Header */}
+          <div className="pt-6">
+            <h2 className="text-xl font-bold leading-snug">{meal.name}</h2>
+            <div className="flex items-center gap-2 mt-2.5">
+              <Badge variant="secondary" className="text-xs font-medium">
+                {MEAL_TYPE_LABELS[meal.mealType] || meal.mealType}
+              </Badge>
+              <Badge variant="outline" className="text-xs font-medium">
+                {meal.source}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Action bar */}
+          {!editing && (
+            <div className="flex items-center gap-1 mt-4 -mx-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={handleSaveAsTemplate}
+                disabled={savingTemplate}
+              >
+                <Bookmark className="h-3.5 w-3.5 mr-1.5" />
+                Save template
+              </Button>
+              <div className="w-px h-4 bg-border/60 mx-1" />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => setEditing(true)}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                Edit
+              </Button>
+              <div className="w-px h-4 bg-border/60 mx-1" />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-2 text-xs text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Delete
+              </Button>
+            </div>
+          )}
+
           {/* Error */}
           {error && (
-            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center justify-between">
+            <div className="mt-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center justify-between">
               {error}
               <button onClick={() => setError("")} className="ml-2 font-bold">&times;</button>
             </div>
           )}
 
-          {/* Image */}
-          {meal.imageUrl && (
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-              <Image
-                src={meal.imageUrl}
-                alt={meal.name}
-                fill
-                className="object-cover"
+          {editing ? (
+            <div className="mt-6">
+              <MacroEditor
+                meal={meal}
+                onSave={handleSave}
+                onCancel={() => setEditing(false)}
               />
             </div>
-          )}
-
-          {editing ? (
-            <MacroEditor
-              meal={meal}
-              onSave={handleSave}
-              onCancel={() => setEditing(false)}
-            />
           ) : (
-            <>
-              {/* Health Rating */}
-              <div className="flex items-center gap-4">
+            <div className="mt-8 space-y-6">
+              {/* Health Rating & Calories Row */}
+              <div className="flex items-center gap-5">
                 <HealthBadge rating={meal.healthRating} size="lg" />
-                <div>
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex-1">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                     Health Rating
                   </div>
-                  <div className="font-medium">
+                  <div className="font-semibold">
                     {meal.healthRating >= 80
                       ? "Very Healthy"
                       : meal.healthRating >= 50
@@ -178,26 +195,16 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
                       : "Unhealthy"}
                   </div>
                 </div>
-              </div>
-
-              {/* Meal Info */}
-              <div className="flex gap-2">
-                <Badge variant="secondary">
-                  {MEAL_TYPE_LABELS[meal.mealType] || meal.mealType}
-                </Badge>
-                <Badge variant="outline">{meal.source}</Badge>
-              </div>
-
-              {/* Calories */}
-              <div className="text-center p-4 bg-muted rounded-2xl">
-                <div className="text-4xl font-bold text-lime">
-                  {meal.calories}
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-lime leading-none">
+                    {meal.calories}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">calories</div>
                 </div>
-                <div className="text-sm text-muted-foreground">calories</div>
               </div>
 
               {/* Macros */}
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <MacroBar
                   label="Protein"
                   value={meal.protein}
@@ -222,54 +229,46 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
               </div>
 
               {/* Additional Info */}
-              {(meal.fiber || meal.sugar || meal.sodium) && (
-                <>
-                  <Separator />
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    {meal.fiber != null && (
-                      <div>
-                        <div className="font-semibold">{meal.fiber}g</div>
-                        <div className="text-xs text-muted-foreground">
-                          Fiber
-                        </div>
-                      </div>
-                    )}
-                    {meal.sugar != null && (
-                      <div>
-                        <div className="font-semibold">{meal.sugar}g</div>
-                        <div className="text-xs text-muted-foreground">
-                          Sugar
-                        </div>
-                      </div>
-                    )}
-                    {meal.sodium != null && (
-                      <div>
-                        <div className="font-semibold">{meal.sodium}mg</div>
-                        <div className="text-xs text-muted-foreground">
-                          Sodium
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
+              {(meal.fiber != null || meal.sugar != null || meal.sodium != null) && (
+                <div className="grid grid-cols-3 gap-3">
+                  {meal.fiber != null && (
+                    <div className="bg-muted/60 rounded-xl p-3 text-center">
+                      <div className="text-lg font-semibold">{meal.fiber}g</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Fiber</div>
+                    </div>
+                  )}
+                  {meal.sugar != null && (
+                    <div className="bg-muted/60 rounded-xl p-3 text-center">
+                      <div className="text-lg font-semibold">{meal.sugar}g</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Sugar</div>
+                    </div>
+                  )}
+                  {meal.sodium != null && (
+                    <div className="bg-muted/60 rounded-xl p-3 text-center">
+                      <div className="text-lg font-semibold">{meal.sodium}mg</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Sodium</div>
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Notes */}
               {meal.notes && (
-                <div className="text-sm text-muted-foreground italic">
-                  {meal.notes}
+                <div className="bg-muted/40 rounded-xl p-4">
+                  <p className="text-sm text-muted-foreground italic leading-relaxed">
+                    {meal.notes}
+                  </p>
                 </div>
               )}
 
               {/* NLP Edit */}
-              <Separator />
-              <div>
-                <div className="text-sm font-medium mb-2">
+              <div className="pt-2">
+                <div className="text-xs font-medium text-muted-foreground mb-2">
                   Edit with natural language
                 </div>
                 <NLPEditInput mealId={meal.id} onUpdate={onUpdate} />
               </div>
-            </>
+            </div>
           )}
         </div>
       </SheetContent>
@@ -293,14 +292,14 @@ function MacroBar({
   const pct = Math.min(100, (value / max) * 100);
   return (
     <div>
-      <div className="flex justify-between text-sm mb-1">
-        <span>{label}</span>
-        <span className="font-medium">
+      <div className="flex justify-between text-sm mb-1.5">
+        <span className="font-medium text-foreground">{label}</span>
+        <span className="font-semibold tabular-nums">
           {value}
           {unit}
         </span>
       </div>
-      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+      <div className="h-2.5 w-full rounded-full bg-muted/80 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all ${color}`}
           style={{ width: `${pct}%` }}

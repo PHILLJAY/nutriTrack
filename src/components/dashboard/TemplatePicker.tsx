@@ -54,11 +54,13 @@ export function TemplatePicker({ onSelect }: TemplatePickerProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button size="sm" variant="outline">
-          <Bookmark className="h-4 w-4 mr-1" />
-          Templates
-        </Button>
+      <DialogTrigger
+        render={
+          <Button size="sm" variant="outline" />
+        }
+      >
+        <Bookmark className="h-4 w-4 mr-1" />
+        Templates
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

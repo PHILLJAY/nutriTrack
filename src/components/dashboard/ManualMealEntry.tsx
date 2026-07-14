@@ -53,11 +53,13 @@ export function ManualMealEntry({ onSuccess }: ManualMealEntryProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button size="sm" variant="outline">
-          <UtensilsCrossed className="h-4 w-4 mr-1" />
-          Quick Add
-        </Button>
+      <DialogTrigger
+        render={
+          <Button size="sm" variant="outline" />
+        }
+      >
+        <UtensilsCrossed className="h-4 w-4 mr-1" />
+        Quick Add
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
