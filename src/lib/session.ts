@@ -3,11 +3,22 @@ import { cookies } from "next/headers";
 const SESSION_COOKIE = "nutritrack_session";
 const SESSION_SECRET = process.env.SESSION_SECRET || "nutritrack-dev-secret-change-me";
 
-// Simple hash for cookie signing (not cryptographically strong, fine for a personal app)
+async function getKey(): Promise<CryptoKey> {
+  const encoder = new TextEncoder();
+  return crypto.subtle.importKey(
+    "raw",
+    encoder.encode(SESSION_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+}
+
 async function sign(value: string): Promise<string> {
-  const data = new TextEncoder().encode(value + SESSION_SECRET);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const key = await getKey();
+  const encoder = new TextEncoder();
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(value));
+  const hashArray = Array.from(new Uint8Array(signature));
   const hash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   return `${value}.${hash}`;
 }
