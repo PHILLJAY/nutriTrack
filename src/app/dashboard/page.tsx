@@ -5,22 +5,33 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendar } from "@/components/dashboard/WeekCalendar";
+import { StreakDisplay } from "@/components/dashboard/StreakDisplay";
 import { Upload, Camera, LogOut, Settings } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
+
+interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  totalDaysLogged: number;
+  todayLogged: boolean;
+  heatmap: { date: string; count: number }[];
+}
 
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [meals, setMeals] = useState<MealData[]>([]);
+  const [streak, setStreak] = useState<StreakData | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
   const fetchData = useCallback(async () => {
     try {
-      const [userRes, mealsRes] = await Promise.all([
+      const [userRes, mealsRes, streakRes] = await Promise.all([
         fetch("/api/user"),
         fetch("/api/meals"),
+        fetch("/api/streaks"),
       ]);
 
       if (userRes.status === 401) {
@@ -41,6 +52,10 @@ export default function DashboardPage() {
             imageUrl: m.image?.path || null,
           }))
         );
+      }
+
+      if (streakRes.ok) {
+        setStreak(await streakRes.json());
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -212,6 +227,14 @@ export default function DashboardPage() {
 
         {/* Weekly Calendar */}
         <WeekCalendar meals={meals} targets={user} onUpdate={fetchData} />
+
+        {/* Streak Tracking */}
+        {streak && (
+          <div className="mt-6">
+            <h2 className="text-lg font-semibold mb-3">Your Streak</h2>
+            <StreakDisplay {...streak} />
+          </div>
+        )}
       </main>
     </div>
   );
