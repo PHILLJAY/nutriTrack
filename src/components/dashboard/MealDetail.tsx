@@ -98,11 +98,13 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
   return (
     <>
       {/* Desktop Panel */}
-      <div className="hidden md:block fixed inset-y-0 right-0 w-full max-w-lg bg-background border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-40" style={{ transform: open ? 'translateX(0)' : 'translateX(100%)' }}>
-        <div className="h-full overflow-y-auto">
-          <MealDetailContent {...contentProps} />
+      {open && (
+        <div className="hidden md:block fixed inset-y-0 right-0 w-full max-w-lg bg-background border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-40 translate-x-0">
+          <div className="h-full overflow-y-auto">
+            <MealDetailContent {...contentProps} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile Sheet */}
       <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
