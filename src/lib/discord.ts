@@ -1,0 +1,147 @@
+import { Client, GatewayIntentBits, Events, Attachment } from "discord.js";
+import { saveImageFromUrl } from "./image-store";
+import { analyzeMealImage } from "./gemini";
+import { prisma } from "./db";
+import { calculateHealthRating } from "./health-rating";
+
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+export function createDiscordBot() {
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.DirectMessages,
+    ],
+  });
+
+  client.on(Events.MessageCreate, async (message) => {
+    if (message.author.bot) return;
+
+    // Check for image attachments
+    const imageAttachments = message.attachments.filter((att) =>
+      ALLOWED_IMAGE_TYPES.includes(att.contentType || "")
+    );
+
+    if (imageAttachments.size === 0) return;
+
+    // Find user by discord ID
+    const user = await prisma.user.findUnique({
+      where: { discordId: message.author.id },
+    });
+
+    if (!user) {
+      await message.reply(
+        "I don't have your account linked yet! Please link your Discord account in the NutriTrack web app settings first."
+      );
+      return;
+    }
+
+    await message.reply("Analyzing your meal... 🍽️");
+
+    for (const attachment of imageAttachments.values()) {
+      try {
+        const result = await processMealImage(attachment, user.id);
+        await message.reply({
+          content: formatMealReply(result),
+          files: [attachment.url],
+        });
+      } catch (error) {
+        console.error("Error processing meal image:", error);
+        await message.reply(
+          "Sorry, I had trouble analyzing that image. Please try again or log the meal manually on the web app."
+        );
+      }
+    }
+  });
+
+  return client;
+}
+
+interface ProcessedMeal {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  healthRating: number;
+  mealType: string;
+  notes: string;
+}
+
+async function processMealImage(
+  attachment: Attachment,
+  userId: string
+): Promise<ProcessedMeal> {
+  // Download and save image
+  const { buffer, filename, path, mimeType } = await saveImageFromUrl(
+    attachment.url,
+    attachment.name
+  );
+
+  // Analyze with Gemini
+  const analysis = await analyzeMealImage(buffer, mimeType);
+
+  // Save image record
+  const image = await prisma.image.create({
+    data: {
+      userId,
+      filename,
+      path,
+      mimeType,
+      size: buffer.length,
+    },
+  });
+
+  // Calculate health rating
+  const healthRating = calculateHealthRating(analysis);
+
+  // Save meal
+  await prisma.meal.create({
+    data: {
+      userId,
+      name: analysis.name,
+      calories: analysis.calories,
+      protein: analysis.protein,
+      carbs: analysis.carbs,
+      fat: analysis.fat,
+      fiber: analysis.fiber,
+      sugar: analysis.sugar,
+      sodium: analysis.sodium,
+      healthRating,
+      mealType: analysis.mealType,
+      eatenAt: new Date(),
+      notes: analysis.notes,
+      source: "discord",
+      imageId: image.id,
+    },
+  });
+
+  return {
+    name: analysis.name,
+    calories: analysis.calories,
+    protein: analysis.protein,
+    carbs: analysis.carbs,
+    fat: analysis.fat,
+    healthRating,
+    mealType: analysis.mealType,
+    notes: analysis.notes,
+  };
+}
+
+function formatMealReply(meal: ProcessedMeal): string {
+  const healthEmoji =
+    meal.healthRating >= 80 ? "🟢" : meal.healthRating >= 50 ? "🟡" : "🔴";
+
+  return [
+    `**${meal.name}**`,
+    `📊 **${meal.calories}** kcal`,
+    `🥩 Protein: ${meal.protein}g | 🍞 Carbs: ${meal.carbs}g | 🧈 Fat: ${meal.fat}g`,
+    `${healthEmoji} Health Rating: **${meal.healthRating}/100**`,
+    `🍽️ Type: ${meal.mealType}`,
+    meal.notes ? `📝 ${meal.notes}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
