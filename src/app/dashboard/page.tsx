@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendar } from "@/components/dashboard/WeekCalendar";
 import { StreakDisplay } from "@/components/dashboard/StreakDisplay";
+import { ManualMealEntry } from "@/components/dashboard/ManualMealEntry";
 import { Upload, Camera, LogOut, Settings } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 
@@ -118,6 +119,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <ManualMealEntry onSuccess={fetchData} />
             <div>
               <input
                 id="meal-upload"

@@ -85,3 +85,41 @@ Fields available: name, calories, protein, carbs, fat, fiber, sugar, sodium, hea
     throw new Error("Gemini returned malformed JSON for NLP edit");
   }
 }
+
+export async function analyzeMealDescription(
+  description: string,
+  mealType: string
+): Promise<GeminiMealAnalysis> {
+  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+
+  const prompt = `The user describes their meal as: "${description}"
+Meal type: ${mealType}
+
+Return ONLY a valid JSON object (no markdown, no code fences):
+{
+  "name": "descriptive meal name",
+  "calories": number,
+  "protein": grams,
+  "carbs": grams,
+  "fat": grams,
+  "fiber": grams,
+  "sugar": grams,
+  "sodium": mg,
+  "healthRating": 0-100,
+  "mealType": "${mealType}",
+  "notes": "brief description"
+}
+
+Be realistic with estimates. Rate healthiness 0-100.`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("Failed to parse response");
+
+  try {
+    return JSON.parse(jsonMatch[0]) as GeminiMealAnalysis;
+  } catch {
+    throw new Error("Gemini returned malformed JSON for meal description");
+  }
+}

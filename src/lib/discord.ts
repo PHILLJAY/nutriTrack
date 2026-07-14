@@ -10,7 +10,7 @@ import {
   EmbedBuilder,
 } from "discord.js";
 import { saveImageFromUrl } from "./image-store";
-import { analyzeMealImage, nlpEditMeal } from "./gemini";
+import { analyzeMealImage, analyzeMealDescription } from "./gemini";
 import { prisma } from "./db";
 import { calculateHealthRating } from "./health-rating";
 import { startOfDay, endOfDay } from "date-fns";
@@ -401,42 +401,6 @@ async function processMealImage(
     mealType: analysis.mealType,
     notes: analysis.notes,
   };
-}
-
-async function analyzeMealDescription(
-  description: string,
-  mealType: string
-): Promise<ProcessedMeal> {
-  const { GoogleGenerativeAI } = await import("@google/generative-ai");
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
-
-  const prompt = `The user describes their meal as: "${description}"
-Meal type: ${mealType}
-
-Return ONLY a valid JSON object (no markdown, no code fences):
-{
-  "name": "descriptive meal name",
-  "calories": number,
-  "protein": grams,
-  "carbs": grams,
-  "fat": grams,
-  "fiber": grams,
-  "sugar": grams,
-  "sodium": mg,
-  "healthRating": 0-100,
-  "mealType": "${mealType}",
-  "notes": "brief description"
-}
-
-Be realistic with estimates. Rate healthiness 0-100.`;
-
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Failed to parse response");
-
-  return JSON.parse(jsonMatch[0]) as ProcessedMeal;
 }
 
 function formatMealReply(meal: ProcessedMeal): string {
