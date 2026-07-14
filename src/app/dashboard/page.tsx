@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { WeekCalendar } from "@/components/dashboard/WeekCalendar";
 import { StreakDisplay } from "@/components/dashboard/StreakDisplay";
 import { ManualMealEntry } from "@/components/dashboard/ManualMealEntry";
-import { Upload, Camera, LogOut, Settings } from "lucide-react";
+import { Upload, Camera, LogOut, Settings, BarChart3 } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 
 interface StreakData {
@@ -144,6 +144,13 @@ export default function DashboardPage() {
                 )}
               </Button>
             </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => router.push("/reports")}
+            >
+              <BarChart3 className="h-4 w-4" />
+            </Button>
             <Button
               size="icon"
               variant="ghost"
