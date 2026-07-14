@@ -53,6 +53,12 @@ const commands = [
   new SlashCommandBuilder()
     .setName("meals")
     .setDescription("See your recent meals"),
+  new SlashCommandBuilder()
+    .setName("weekly")
+    .setDescription("See your nutrition summary for the past 7 days"),
+  new SlashCommandBuilder()
+    .setName("goals")
+    .setDescription("See your current nutrition targets"),
 ];
 
 export function createDiscordBot() {
@@ -96,6 +102,12 @@ export function createDiscordBot() {
           break;
         case "meals":
           await handleMeals(interaction);
+          break;
+        case "weekly":
+          await handleWeekly(interaction);
+          break;
+        case "goals":
+          await handleGoals(interaction);
           break;
       }
     } catch (error) {
@@ -335,6 +347,101 @@ async function handleMeals(interaction: ChatInputCommandInteraction) {
     .setFooter({ text: "NutriTrack" });
 
   await interaction.editReply({ embeds: [embed] });
+}
+
+async function handleWeekly(interaction: ChatInputCommandInteraction) {
+  const user = await prisma.user.findUnique({
+    where: { discordId: interaction.user.id },
+  });
+
+  if (!user) {
+    await interaction.reply({
+      content: "Your account isn't linked yet! Use `/link` to get your Discord ID.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await interaction.deferReply();
+
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const meals = await prisma.meal.findMany({
+    where: {
+      userId: user.id,
+      eatenAt: { gte: weekAgo },
+    },
+  });
+
+  const totals = meals.reduce(
+    (acc, m) => ({
+      calories: acc.calories + m.calories,
+      protein: acc.protein + m.protein,
+      carbs: acc.carbs + m.carbs,
+      fat: acc.fat + m.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
+
+  const avgCalories = Math.round(totals.calories / 7);
+  const avgHealth = meals.length > 0
+    ? Math.round(meals.reduce((s, m) => s + m.healthRating, 0) / meals.length)
+    : 0;
+  const daysLogged = new Set(
+    meals.map((m) => new Date(m.eatenAt).toISOString().split("T")[0])
+  ).size;
+
+  const embed = new EmbedBuilder()
+    .setTitle("Weekly Summary")
+    .setColor(0x8b5cf6)
+    .addFields(
+      { name: "Total Calories", value: `${totals.calories} kcal`, inline: true },
+      { name: "Avg Cal/Day", value: `${avgCalories} kcal`, inline: true },
+      { name: "Days Logged", value: `${daysLogged}/7`, inline: true },
+      { name: "Avg Protein/Day", value: `${Math.round(totals.protein / 7)}g`, inline: true },
+      { name: "Avg Carbs/Day", value: `${Math.round(totals.carbs / 7)}g`, inline: true },
+      { name: "Avg Fat/Day", value: `${Math.round(totals.fat / 7)}g`, inline: true },
+      { name: "Avg Health Score", value: `${avgHealth}/100`, inline: true },
+      { name: "Total Meals", value: `${meals.length}`, inline: true }
+    )
+    .setFooter({ text: "NutriTrack" });
+
+  await interaction.editReply({ embeds: [embed] });
+}
+
+async function handleGoals(interaction: ChatInputCommandInteraction) {
+  const user = await prisma.user.findUnique({
+    where: { discordId: interaction.user.id },
+  });
+
+  if (!user) {
+    await interaction.reply({
+      content: "Your account isn't linked yet! Use `/link` to get your Discord ID.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const goalLabels: Record<string, string> = {
+    lose: "Lose Weight (-500 kcal/day)",
+    maintain: "Maintain Weight",
+    gain: "Gain Weight (+300 kcal/day)",
+  };
+
+  const embed = new EmbedBuilder()
+    .setTitle("Your Nutrition Goals")
+    .setColor(0x22c55e)
+    .addFields(
+      { name: "Goal", value: goalLabels[user.goal] || user.goal, inline: false },
+      { name: "Calories", value: `${user.targetCalories} kcal/day`, inline: true },
+      { name: "Protein", value: `${user.targetProtein}g/day`, inline: true },
+      { name: "Carbs", value: `${user.targetCarbs}g/day`, inline: true },
+      { name: "Fat", value: `${user.targetFat}g/day`, inline: true }
+    )
+    .setFooter({ text: "Update goals on the NutriTrack web app" });
+
+  await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
 // --- Helpers ---
