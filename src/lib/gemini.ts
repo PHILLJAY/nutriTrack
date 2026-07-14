@@ -123,3 +123,61 @@ Be realistic with estimates. Rate healthiness 0-100.`;
     throw new Error("Gemini returned malformed JSON for meal description");
   }
 }
+
+export interface MealSuggestion {
+  name: string;
+  description: string;
+  estimatedCalories: number;
+  estimatedProtein: number;
+  estimatedCarbs: number;
+  estimatedFat: number;
+  why: string;
+}
+
+export async function suggestMeals(remaining: {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  goal: string;
+  recentMeals?: string[];
+}): Promise<MealSuggestion[]> {
+  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+
+  const recentContext = remaining.recentMeals?.length
+    ? `\nRecent meals eaten today: ${remaining.recentMeals.join(", ")}`
+    : "";
+
+  const prompt = `Suggest 3 meal ideas for someone with these remaining daily macros:
+- Calories: ${remaining.calories} kcal
+- Protein: ${remaining.protein}g
+- Carbs: ${remaining.carbs}g
+- Fat: ${remaining.fat}g
+- Goal: ${remaining.goal}${recentContext}
+
+Return ONLY a valid JSON array (no markdown, no code fences):
+[
+  {
+    "name": "meal name",
+    "description": "brief description",
+    "estimatedCalories": number,
+    "estimatedProtein": grams,
+    "estimatedCarbs": grams,
+    "estimatedFat": grams,
+    "why": "why this is a good choice for their remaining macros"
+  }
+]
+
+Keep suggestions practical and realistic. Prioritize protein if they need more.`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error("Failed to parse suggestions");
+
+  try {
+    return JSON.parse(jsonMatch[0]) as MealSuggestion[];
+  } catch {
+    throw new Error("Gemini returned malformed JSON for suggestions");
+  }
+}
