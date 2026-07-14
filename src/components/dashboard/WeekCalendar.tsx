@@ -60,7 +60,8 @@ export function WeekCalendar({ meals, targets, onUpdate }: WeekCalendarProps) {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 md:flex md:gap-8 md:items-start">
+      <div className="flex-1 space-y-4">
       {/* Week Navigation */}
       <div className="flex items-center justify-between">
         <Button
@@ -165,6 +166,7 @@ export function WeekCalendar({ meals, targets, onUpdate }: WeekCalendarProps) {
           }}
         />
       )}
+      </div>
     </div>
   );
 }
