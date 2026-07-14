@@ -24,7 +24,13 @@ export function createDiscordBot() {
       ALLOWED_IMAGE_TYPES.includes(att.contentType || "")
     );
 
-    if (imageAttachments.size === 0) return;
+    if (imageAttachments.size === 0) {
+      // If someone sends a text message to the bot, give a helpful nudge
+      if (message.channel.isDMBased()) {
+        await message.reply("Send me a photo of your meal and I'll log it for you!");
+      }
+      return;
+    }
 
     // Find user by discord ID
     const user = await prisma.user.findUnique({
@@ -38,7 +44,7 @@ export function createDiscordBot() {
       return;
     }
 
-    await message.reply("Analyzing your meal... 🍽️");
+    await message.reply("Let me take a look at that...");
 
     for (const attachment of imageAttachments.values()) {
       try {
@@ -134,13 +140,30 @@ function formatMealReply(meal: ProcessedMeal): string {
   const healthEmoji =
     meal.healthRating >= 80 ? "🟢" : meal.healthRating >= 50 ? "🟡" : "🔴";
 
+  const healthComment =
+    meal.healthRating >= 80
+      ? "Solid choice!"
+      : meal.healthRating >= 50
+      ? "Not bad, could be better."
+      : "Treat meal — balance it out later.";
+
+  const mealTypeLabel: Record<string, string> = {
+    breakfast: "breakfast",
+    lunch: "lunch",
+    dinner: "dinner",
+    snack: "snack",
+  };
+
   return [
-    `**${meal.name}**`,
+    `Oh nice, that looks like a **${meal.name}** for ${mealTypeLabel[meal.mealType] || "your meal"}!`,
+    ``,
     `📊 **${meal.calories}** kcal`,
-    `🥩 Protein: ${meal.protein}g | 🍞 Carbs: ${meal.carbs}g | 🧈 Fat: ${meal.fat}g`,
-    `${healthEmoji} Health Rating: **${meal.healthRating}/100**`,
-    `🍽️ Type: ${meal.mealType}`,
-    meal.notes ? `📝 ${meal.notes}` : "",
+    `🥩 Protein: **${meal.protein}g** | 🍞 Carbs: **${meal.carbs}g** | 🧈 Fat: **${meal.fat}g**`,
+    meal.fiber ? `🌾 Fiber: ${meal.fiber}g` : "",
+    meal.sugar ? `🍬 Sugar: ${meal.sugar}g` : "",
+    ``,
+    `${healthEmoji} Health Rating: **${meal.healthRating}/100** — ${healthComment}`,
+    meal.notes ? `> ${meal.notes}` : "",
   ]
     .filter(Boolean)
     .join("\n");
