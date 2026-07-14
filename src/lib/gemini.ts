@@ -23,14 +23,19 @@ Be realistic with portion estimates. If uncertain, estimate conservatively.`;
 
 export async function analyzeMealImage(
   imageBuffer: Buffer,
-  mimeType: string
+  mimeType: string,
+  userContext?: string
 ): Promise<GeminiMealAnalysis> {
   const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
   const base64 = imageBuffer.toString("base64");
 
+  const prompt = userContext
+    ? `${ANALYSIS_PROMPT}\n\nAdditional context from the user: "${userContext}"\nUse this text to improve your analysis — it may describe ingredients, portion sizes, or preparation method that aren't visible in the photo.`
+    : ANALYSIS_PROMPT;
+
   const result = await model.generateContent([
-    ANALYSIS_PROMPT,
+    prompt,
     {
       inlineData: {
         data: base64,

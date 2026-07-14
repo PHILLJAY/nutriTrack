@@ -150,9 +150,12 @@ export function createDiscordBot() {
 
     await message.reply("Let me take a look at that...");
 
+    // Extract any text the user sent alongside the image
+    const userContext = message.content.trim() || undefined;
+
     for (const attachment of imageAttachments.values()) {
       try {
-        const result = await processMealImage(attachment, user.id);
+        const result = await processMealImage(attachment, user.id, userContext);
         await message.reply({
           content: formatMealReply(result),
           files: [attachment.url],
@@ -462,14 +465,15 @@ interface ProcessedMeal {
 
 async function processMealImage(
   attachment: Attachment,
-  userId: string
+  userId: string,
+  userContext?: string
 ): Promise<ProcessedMeal> {
   const { buffer, filename, path, mimeType } = await saveImageFromUrl(
     attachment.url,
     attachment.name
   );
 
-  const analysis = await analyzeMealImage(buffer, mimeType);
+  const analysis = await analyzeMealImage(buffer, mimeType, userContext);
 
   const image = await prisma.image.create({
     data: { userId, filename, path, mimeType, size: buffer.length },

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const { filename, path } = await saveImage(buffer, file.name, file.type);
+  const { filename, path, buffer: storedBuffer, mimeType: storedMime } = await saveImage(buffer, file.name, file.type);
 
   // Save image record
   const image = await prisma.image.create({
@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       userId,
       filename,
       path,
-      mimeType: file.type,
-      size: buffer.length,
+      mimeType: storedMime,
+      size: storedBuffer.length,
     },
   });
 
