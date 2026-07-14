@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { MealData } from "@/types";
 
 interface DailySummaryProps {
@@ -12,6 +13,8 @@ interface DailySummaryProps {
     targetFat: number;
   };
 }
+
+const COLORS = ["#ef4444", "#3b82f6", "#eab308"];
 
 export function DailySummary({ meals, targets }: DailySummaryProps) {
   const totals = meals.reduce(
@@ -28,6 +31,14 @@ export function DailySummary({ meals, targets }: DailySummaryProps) {
     100,
     Math.round((totals.calories / targets.targetCalories) * 100)
   );
+
+  const macroData = [
+    { name: "Protein", value: Math.round(totals.protein), target: targets.targetProtein, color: COLORS[0] },
+    { name: "Carbs", value: Math.round(totals.carbs), target: targets.targetCarbs, color: COLORS[1] },
+    { name: "Fat", value: Math.round(totals.fat), target: targets.targetFat, color: COLORS[2] },
+  ];
+
+  const pieData = macroData.filter((d) => d.value > 0);
 
   return (
     <Card>
@@ -49,31 +60,53 @@ export function DailySummary({ meals, targets }: DailySummaryProps) {
           />
         </div>
 
-        {/* Macro summary */}
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-lg font-bold text-red-500">
-              {Math.round(totals.protein)}g
+        {/* Macro breakdown with pie chart */}
+        <div className="flex items-center gap-4">
+          {/* Pie chart */}
+          {pieData.length > 0 && (
+            <div className="w-20 h-20 shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={20}
+                    outerRadius={35}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={index} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value, name) => [`${value}g`, name]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Protein ({targets.targetProtein}g)
-            </div>
-          </div>
-          <div>
-            <div className="text-lg font-bold text-blue-500">
-              {Math.round(totals.carbs)}g
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Carbs ({targets.targetCarbs}g)
-            </div>
-          </div>
-          <div>
-            <div className="text-lg font-bold text-yellow-500">
-              {Math.round(totals.fat)}g
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Fat ({targets.targetFat}g)
-            </div>
+          )}
+
+          {/* Macro bars */}
+          <div className="flex-1 space-y-2">
+            {macroData.map((macro) => {
+              const pct = Math.min(100, Math.round((macro.value / macro.target) * 100));
+              return (
+                <div key={macro.name}>
+                  <div className="flex justify-between text-xs mb-0.5">
+                    <span>{macro.name}</span>
+                    <span className="text-muted-foreground">{macro.value}/{macro.target}g</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${pct}%`, backgroundColor: macro.color }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </CardContent>
