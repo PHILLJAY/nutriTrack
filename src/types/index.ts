@@ -12,6 +12,7 @@ export interface UserProfile {
   targetProtein: number;
   targetCarbs: number;
   targetFat: number;
+  timezone: string;
 }
 
 export interface MealData {

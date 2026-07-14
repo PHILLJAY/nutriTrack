@@ -23,6 +23,7 @@ export default function OnboardingPage() {
     weight: "",
     activityLevel: "",
     goal: "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
   const [targets, setTargets] = useState<{
     targetCalories: number;
@@ -77,6 +78,7 @@ export default function OnboardingPage() {
           weight: parseFloat(data.weight),
           activityLevel: data.activityLevel,
           goal: data.goal,
+          timezone: data.timezone,
         }),
       });
 

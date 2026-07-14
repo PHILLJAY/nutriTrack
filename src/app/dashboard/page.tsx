@@ -8,6 +8,7 @@ import { WeekCalendar } from "@/components/dashboard/WeekCalendar";
 import { StreakDisplay } from "@/components/dashboard/StreakDisplay";
 import { ManualMealEntry } from "@/components/dashboard/ManualMealEntry";
 import { TemplatePicker } from "@/components/dashboard/TemplatePicker";
+import { WaterTracker } from "@/components/dashboard/WaterTracker";
 import { Upload, Camera, LogOut, Settings, BarChart3 } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 

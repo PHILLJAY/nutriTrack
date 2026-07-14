@@ -10,11 +10,37 @@ interface StepBasicsProps {
     gender: string;
     height: string;
     weight: string;
+    timezone: string;
   };
   onChange: (data: Partial<StepBasicsProps["data"]>) => void;
 }
 
+const COMMON_TIMEZONES = [
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "America/Anchorage",
+  "Pacific/Honolulu",
+  "America/Toronto",
+  "America/Vancouver",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Europe/Moscow",
+  "Asia/Dubai",
+  "Asia/Kolkata",
+  "Asia/Shanghai",
+  "Asia/Tokyo",
+  "Asia/Seoul",
+  "Australia/Sydney",
+  "Australia/Perth",
+  "Pacific/Auckland",
+];
+
 export function StepBasics({ data, onChange }: StepBasicsProps) {
+  const detectedTz = data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   return (
     <div className="space-y-6">
       <div>
@@ -41,6 +67,7 @@ export function StepBasics({ data, onChange }: StepBasicsProps) {
             <Input
               id="age"
               type="number"
+              inputMode="numeric"
               placeholder="25"
               value={data.age}
               onChange={(e) => onChange({ age: e.target.value })}
@@ -68,6 +95,7 @@ export function StepBasics({ data, onChange }: StepBasicsProps) {
             <Input
               id="height"
               type="number"
+              inputMode="decimal"
               placeholder="175"
               value={data.height}
               onChange={(e) => onChange({ height: e.target.value })}
@@ -78,11 +106,31 @@ export function StepBasics({ data, onChange }: StepBasicsProps) {
             <Input
               id="weight"
               type="number"
+              inputMode="decimal"
               placeholder="70"
               value={data.weight}
               onChange={(e) => onChange({ weight: e.target.value })}
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="timezone">Timezone</Label>
+          <select
+            id="timezone"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            value={detectedTz}
+            onChange={(e) => onChange({ timezone: e.target.value })}
+          >
+            {COMMON_TIMEZONES.map((tz) => (
+              <option key={tz} value={tz}>
+                {tz.replace(/_/g, " ")}
+              </option>
+            ))}
+            {!COMMON_TIMEZONES.includes(detectedTz) && (
+              <option value={detectedTz}>{detectedTz.replace(/_/g, " ")}</option>
+            )}
+          </select>
         </div>
       </div>
     </div>

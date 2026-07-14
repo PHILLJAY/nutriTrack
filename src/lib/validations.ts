@@ -8,6 +8,7 @@ export const onboardingSchema = z.object({
   weight: z.number().min(20).max(500),
   activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]),
   goal: z.enum(["lose", "maintain", "gain"]),
+  timezone: z.string().optional(),
 });
 
 export const mealCreateSchema = z.object({
@@ -56,4 +57,5 @@ export const userUpdateSchema = z.object({
   weight: z.number().min(20).max(500).optional(),
   activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]).optional(),
   goal: z.enum(["lose", "maintain", "gain"]).optional(),
+  timezone: z.string().optional(),
 });

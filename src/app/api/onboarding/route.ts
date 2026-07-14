@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
       weight: data.weight,
       activityLevel: data.activityLevel,
       goal: data.goal,
+      timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       ...targets,
     },
   });

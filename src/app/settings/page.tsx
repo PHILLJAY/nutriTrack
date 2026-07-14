@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, CheckCircle, LinkIcon } from "lucide-react";
+import { ArrowLeft, CheckCircle, LinkIcon, Globe } from "lucide-react";
 import type { UserProfile } from "@/types";
 
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [discordId, setDiscordId] = useState("");
+  const [timezone, setTimezone] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +33,7 @@ export default function SettingsPage() {
         if (data?.user) {
           setUser(data.user);
           setDiscordId(data.user.discordId || "");
+          setTimezone(data.user.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
         }
       })
       .catch(() => setError("Failed to load profile"))
@@ -177,6 +179,51 @@ export default function SettingsPage() {
                 </div>
                 <div className="text-xs text-muted-foreground">Fat</div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Timezone */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Timezone
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+              >
+                {[
+                  "America/New_York", "America/Chicago", "America/Denver",
+                  "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
+                  "America/Toronto", "America/Vancouver",
+                  "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Moscow",
+                  "Asia/Dubai", "Asia/Kolkata", "Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul",
+                  "Australia/Sydney", "Australia/Perth", "Pacific/Auckland",
+                ].map((tz) => (
+                  <option key={tz} value={tz}>{tz.replace(/_/g, " ")}</option>
+                ))}
+              </select>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  await fetch("/api/user", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ timezone }),
+                  });
+                }}
+              >
+                Save Timezone
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Times in meal logs, calendar, and Discord bot will use this timezone.
+              </p>
             </div>
           </CardContent>
         </Card>

@@ -13,7 +13,7 @@ import { saveImageFromUrl } from "./image-store";
 import { analyzeMealImage, analyzeMealDescription } from "./gemini";
 import { prisma } from "./db";
 import { calculateHealthRating } from "./health-rating";
-import { startOfDay, endOfDay } from "date-fns";
+import { getStartOfDayInTimezone, getEndOfDayInTimezone } from "./timezone";
 
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
@@ -184,11 +184,11 @@ async function handleStatus(interaction: ChatInputCommandInteraction) {
 
   await interaction.deferReply();
 
-  const now = new Date();
+  const tz = user.timezone || "UTC";
   const meals = await prisma.meal.findMany({
     where: {
       userId: user.id,
-      eatenAt: { gte: startOfDay(now), lte: endOfDay(now) },
+      eatenAt: { gte: getStartOfDayInTimezone(tz), lte: getEndOfDayInTimezone(tz) },
     },
   });
 
@@ -326,6 +326,7 @@ async function handleMeals(interaction: ChatInputCommandInteraction) {
           const time = new Date(m.eatenAt).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
+            timeZone: user.timezone || "UTC",
           });
           return `**${m.name}** (${time}) — ${m.calories} kcal`;
         })
