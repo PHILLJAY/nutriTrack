@@ -107,11 +107,13 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
       )}
 
       {/* Mobile Sheet */}
-      <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-        <SheetContent className="md:hidden overflow-y-auto w-full sm:max-w-lg p-0">
-          <MealDetailContent {...contentProps} />
-        </SheetContent>
-      </Sheet>
+      <div className="md:hidden">
+        <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
+          <SheetContent className="overflow-y-auto w-full sm:max-w-lg p-0">
+            <MealDetailContent {...contentProps} />
+          </SheetContent>
+        </Sheet>
+      </div>
     </>
   );
 }
