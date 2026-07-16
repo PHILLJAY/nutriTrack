@@ -55,7 +55,7 @@ export function MealDetailContent({
 
       <div className="px-6 pb-8 relative">
         <div className="pt-6">
-          <h2 className="text-xl font-bold leading-snug">{meal.name}</h2>
+          <h2 className="text-xl font-bold leading-snug break-words">{meal.name}</h2>
           <div className="flex items-center gap-2 mt-2.5">
             <Badge variant="secondary" className="text-xs font-medium">
               {MEAL_TYPE_LABELS[meal.mealType] || meal.mealType}
@@ -189,7 +189,7 @@ export function MealDetailContent({
 
             {meal.notes && (
               <div className="bg-muted/40 rounded-xl p-4">
-                <p className="text-sm text-muted-foreground italic leading-relaxed">
+                <p className="text-sm text-muted-foreground italic leading-relaxed break-words">
                   {meal.notes}
                 </p>
               </div>

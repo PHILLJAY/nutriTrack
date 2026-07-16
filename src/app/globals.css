@@ -164,6 +164,14 @@
   }
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 @layer components {
   /* Fixed, softly rotating concentric ring backdrop, reminiscent of the
      reference site's swirl motif. Sits behind all content. */
