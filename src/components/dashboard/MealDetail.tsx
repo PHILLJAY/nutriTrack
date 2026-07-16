@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -16,6 +16,15 @@ interface MealDetailProps {
 }
 
 export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
@@ -98,8 +107,8 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
   return (
     <>
       {/* Desktop Panel */}
-      {open && (
-        <div className="hidden md:block fixed inset-y-0 right-0 w-full max-w-lg bg-background border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-40 translate-x-0">
+      {open && !isMobile && (
+        <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-background border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-40 translate-x-0">
           <div className="h-full overflow-y-auto">
             <MealDetailContent {...contentProps} />
           </div>
@@ -107,13 +116,13 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
       )}
 
       {/* Mobile Sheet */}
-      <div className="md:hidden">
+      {isMobile && (
         <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
           <SheetContent className="overflow-y-auto w-full sm:max-w-lg p-0">
             <MealDetailContent {...contentProps} />
           </SheetContent>
         </Sheet>
-      </div>
+      )}
     </>
   );
 }

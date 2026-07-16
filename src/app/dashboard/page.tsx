@@ -114,7 +114,7 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border/60 bg-background/70 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -124,25 +124,27 @@ export default function DashboardPage() {
               Hey, {user.name}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <ManualMealEntry onSuccess={fetchData} />
-            <TemplatePicker
-              onSelect={async (template) => {
-                await fetch("/api/meals", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    name: template.name,
-                    calories: template.calories,
-                    protein: template.protein,
-                    carbs: template.carbs,
-                    fat: template.fat,
-                    mealType: template.mealType,
-                  }),
-                });
-                fetchData();
-              }}
-            />
+            <div className="hidden sm:block">
+              <TemplatePicker
+                onSelect={async (template) => {
+                  await fetch("/api/meals", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      name: template.name,
+                      calories: template.calories,
+                      protein: template.protein,
+                      carbs: template.carbs,
+                      fat: template.fat,
+                      mealType: template.mealType,
+                    }),
+                  });
+                  fetchData();
+                }}
+              />
+            </div>
             <div>
               <input
                 id="meal-upload"
@@ -161,8 +163,8 @@ export default function DashboardPage() {
                   <>Analyzing...</>
                 ) : (
                   <>
-                    <Camera className="h-4 w-4 mr-1" />
-                    Log Meal
+                    <Camera className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Log Meal</span>
                   </>
                 )}
               </Button>
