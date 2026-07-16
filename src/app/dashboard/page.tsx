@@ -184,8 +184,8 @@ export default function DashboardPage() {
             <Button
               size="icon"
               variant="ghost"
-              onClick={() => {
-                document.cookie = "nutritrack_session=; path=/; max-age=0";
+              onClick={async () => {
+                await fetch("/api/auth/logout", { method: "POST" });
                 router.push("/onboarding");
               }}
             >
