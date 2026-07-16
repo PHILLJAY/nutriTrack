@@ -13,6 +13,7 @@ import { WaterTracker } from "@/components/dashboard/WaterTracker";
 import { WeightTracker } from "@/components/dashboard/WeightTracker";
 import { MealSuggestions } from "@/components/dashboard/MealSuggestions";
 import { ComparisonChart } from "@/components/dashboard/ComparisonChart";
+import { BarcodeScanner } from "@/components/dashboard/BarcodeScanner";
 import { Upload, Camera, LogOut, Settings, BarChart3 } from "lucide-react";
 import type { UserProfile, MealData } from "@/types";
 
@@ -126,6 +127,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-1.5">
             <ManualMealEntry onSuccess={fetchData} />
+            <BarcodeScanner onSuccess={fetchData} />
             <div className="hidden sm:block">
               <TemplatePicker
                 onSelect={async (template) => {
