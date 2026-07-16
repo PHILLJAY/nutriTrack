@@ -102,6 +102,7 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
     handleSave,
     handleDelete,
     onUpdate,
+    onClose,
   };
 
   return (
@@ -118,7 +119,7 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
       {/* Mobile Sheet */}
       {isMobile && (
         <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-          <SheetContent className="overflow-y-auto w-full sm:max-w-lg p-0">
+          <SheetContent className="overflow-y-auto w-full sm:max-w-lg p-0" showCloseButton={false}>
             <MealDetailContent {...contentProps} />
           </SheetContent>
         </Sheet>

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Bookmark } from "lucide-react";
+import { Pencil, Trash2, Bookmark, X } from "lucide-react";
 import { HealthBadge } from "./HealthBadge";
 import { MacroEditor } from "./MacroEditor";
 import { NLPEditInput } from "./NLPEditInput";
@@ -25,6 +25,7 @@ interface MealDetailContentProps {
   handleSave: (updates: Partial<MealData>) => void;
   handleDelete: () => void;
   onUpdate: () => void;
+  onClose: () => void;
 }
 
 export function MealDetailContent({
@@ -38,9 +39,18 @@ export function MealDetailContent({
   handleSave,
   handleDelete,
   onUpdate,
+  onClose,
 }: MealDetailContentProps) {
   return (
     <>
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 z-10 rounded-full bg-background/80 backdrop-blur-sm p-2 hover:bg-background transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
+
       {meal.imageUrl && (
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
           <Image
