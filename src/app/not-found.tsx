@@ -1,5 +1,6 @@
+"use client";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -9,9 +10,12 @@ export default function NotFound() {
         <p className="text-sm text-muted-foreground">
           This page doesn&apos;t exist. It may have been moved or deleted.
         </p>
-        <Button variant="outline" onClick={() => window.location.href = "/dashboard"}>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+        >
           Back to Dashboard
-        </Button>
+        </Link>
       </div>
     </div>
   );
