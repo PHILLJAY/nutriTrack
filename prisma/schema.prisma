@@ -1,3 +1,23 @@
+// ============================================================================
+// PostgreSQL Migration Path
+// ============================================================================
+// To switch to PostgreSQL (recommended for production on Railway/Neon/Supabase):
+//
+// 1. Change the datasource block:
+//    datasource db {
+//      provider = "postgresql"
+//      url      = env("DATABASE_URL")
+//    }
+//
+// 2. Set DATABASE_URL in .env:
+//    DATABASE_URL="postgresql://user:password@host:5432/nutritrack?schema=public"
+//
+// 3. Run migration:
+//    npx prisma migrate dev --name switch_to_postgresql
+//
+// All models use cuid() for IDs, which is compatible with both SQLite and PostgreSQL.
+// ============================================================================
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -31,6 +51,18 @@ model User {
   mealTemplates   MealTemplate[]
   waterEntries    WaterEntry[]
   weightEntries   WeightEntry[]
+  groceryLists    GroceryList[]
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
 }
 
 model WeightEntry {
@@ -38,7 +70,7 @@ model WeightEntry {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   weight    Float
-  date      String   // YYYY-MM-DD
+  date      String
   notes     String?
   createdAt DateTime @default(now())
 }
@@ -48,7 +80,7 @@ model WaterEntry {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   glasses   Int
-  date      String   // YYYY-MM-DD
+  date      String
   createdAt DateTime @default(now())
 }
 
@@ -66,6 +98,7 @@ model MealTemplate {
   sodium       Float?
   mealType     String
   notes        String?
+  isFavorite   Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -82,6 +115,11 @@ model Meal {
   fiber        Float?
   sugar        Float?
   sodium       Float?
+  vitaminA     Float?
+  vitaminC     Float?
+  vitaminD     Float?
+  calcium      Float?
+  iron         Float?
   healthRating Int
   mealType     String
   eatenAt      DateTime
@@ -89,6 +127,7 @@ model Meal {
   source       String
   imageId      String?
   image        Image?    @relation(fields: [imageId], references: [id])
+  sortOrder    Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -102,4 +141,24 @@ model Image {
   size      Int
   createdAt DateTime @default(now())
   meals     Meal[]
+}
+
+model GroceryList {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  name      String
+  items     GroceryItem[]
+  createdAt DateTime      @default(now())
+}
+
+model GroceryItem {
+  id        String      @id @default(cuid())
+  listId    String
+  list      GroceryList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  name      String
+  quantity  String?
+  unit      String?
+  checked   Boolean     @default(false)
+  createdAt DateTime    @default(now())
 }

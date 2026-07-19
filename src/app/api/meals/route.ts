@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   const meals = await prisma.meal.findMany({
     where,
     include: { image: true },
-    orderBy: { eatenAt: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { eatenAt: "asc" }],
   });
 
   return Response.json({ meals });
@@ -61,12 +61,18 @@ export async function POST(request: NextRequest) {
       fiber: data.fiber ?? null,
       sugar: data.sugar ?? null,
       sodium: data.sodium ?? null,
+      vitaminA: data.vitaminA ?? null,
+      vitaminC: data.vitaminC ?? null,
+      vitaminD: data.vitaminD ?? null,
+      calcium: data.calcium ?? null,
+      iron: data.iron ?? null,
       healthRating,
       mealType: data.mealType || "snack",
       eatenAt: data.eatenAt ? new Date(data.eatenAt) : new Date(),
       notes: data.notes ?? null,
       source: "web",
       imageId: data.imageId ?? null,
+      sortOrder: data.sortOrder ?? 0,
     },
     include: { image: true },
   });

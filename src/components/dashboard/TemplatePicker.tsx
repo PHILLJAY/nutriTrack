@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Bookmark, Trash2 } from "lucide-react";
+import { Bookmark, Trash2, Star } from "lucide-react";
 
 interface Template {
   id: string;
@@ -19,6 +19,7 @@ interface Template {
   carbs: number;
   fat: number;
   mealType: string;
+  isFavorite: boolean;
 }
 
 interface TemplatePickerProps {
@@ -52,6 +53,26 @@ export function TemplatePicker({ onSelect }: TemplatePickerProps) {
     setTemplates((prev) => prev.filter((t) => t.id !== id));
   };
 
+  const handleToggleFavorite = async (id: string) => {
+    const res = await fetch(`/api/templates/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setTemplates((prev) =>
+        prev
+          .map((t) => (t.id === id ? { ...t, isFavorite: data.template.isFavorite } : t))
+          .sort((a, b) => {
+            if (a.isFavorite && !b.isFavorite) return -1;
+            if (!a.isFavorite && b.isFavorite) return 1;
+            return 0;
+          })
+      );
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
@@ -79,13 +100,25 @@ export function TemplatePicker({ onSelect }: TemplatePickerProps) {
                 key={t.id}
                 className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50"
               >
-                <div>
-                  <div className="font-medium text-sm">{t.name}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    {t.isFavorite && <Star className="h-3 w-3 text-yellow-400 fill-yellow-400 shrink-0" />}
+                    <div className="font-medium text-sm truncate">{t.name}</div>
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {t.calories} kcal · P:{t.protein}g C:{t.carbs}g F:{t.fat}g
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 shrink-0 ml-2">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7"
+                    onClick={() => handleToggleFavorite(t.id)}
+                    title={t.isFavorite ? "Unfavorite" : "Favorite"}
+                  >
+                    <Star className={`h-3.5 w-3.5 ${t.isFavorite ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} />
+                  </Button>
                   <Button
                     size="sm"
                     onClick={() => {

@@ -20,10 +20,16 @@ export const mealCreateSchema = z.object({
   fiber: z.number().min(0).max(200).optional(),
   sugar: z.number().min(0).max(500).optional(),
   sodium: z.number().min(0).max(50000).optional(),
+  vitaminA: z.number().min(0).max(50000).optional(),
+  vitaminC: z.number().min(0).max(10000).optional(),
+  vitaminD: z.number().min(0).max(1000).optional(),
+  calcium: z.number().min(0).max(10000).optional(),
+  iron: z.number().min(0).max(500).optional(),
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]).optional(),
   notes: z.string().max(500).optional(),
   eatenAt: z.string().optional(),
   imageId: z.string().optional(),
+  sortOrder: z.number().int().optional(),
 });
 
 export const mealUpdateSchema = z.object({
@@ -35,9 +41,15 @@ export const mealUpdateSchema = z.object({
   fiber: z.number().min(0).max(200).nullable().optional(),
   sugar: z.number().min(0).max(500).nullable().optional(),
   sodium: z.number().min(0).max(50000).nullable().optional(),
+  vitaminA: z.number().min(0).max(50000).nullable().optional(),
+  vitaminC: z.number().min(0).max(10000).nullable().optional(),
+  vitaminD: z.number().min(0).max(1000).nullable().optional(),
+  calcium: z.number().min(0).max(10000).nullable().optional(),
+  iron: z.number().min(0).max(500).nullable().optional(),
   mealType: z.enum(["breakfast", "lunch", "dinner", "snack"]).optional(),
   notes: z.string().max(500).nullable().optional(),
   eatenAt: z.string().optional(),
+  sortOrder: z.number().int().optional(),
 });
 
 export const nlpEditSchema = z.object({

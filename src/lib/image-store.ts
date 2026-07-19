@@ -12,24 +12,31 @@ const JPEG_QUALITY = 80;
 async function compressImage(
   buffer: Buffer,
   mimeType: string
-): Promise<{ buffer: Buffer; mimeType: string }> {
-  // Don't compress GIFs (animated)
+): Promise<{ buffer: Buffer; mimeType: string; thumbBuffer?: Buffer }> {
   if (mimeType === "image/gif") {
     return { buffer, mimeType };
   }
 
   try {
-    const compressed = await sharp(buffer)
+    const base = sharp(buffer)
+      .rotate() // strip EXIF orientation + metadata
       .resize({
         width: MAX_DIMENSION,
         height: MAX_DIMENSION,
         fit: "inside",
         withoutEnlargement: true,
-      })
-      .jpeg({ quality: JPEG_QUALITY })
+      });
+
+    // Generate WebP version
+    const webp = await base.clone().webp({ quality: 75 }).toBuffer();
+
+    // Generate 600px thumbnail
+    const thumb = await base.clone()
+      .resize({ width: 600, height: 600, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 60 })
       .toBuffer();
 
-    return { buffer: compressed, mimeType: "image/jpeg" };
+    return { buffer: webp, mimeType: "image/webp", thumbBuffer: thumb };
   } catch {
     return { buffer, mimeType };
   }
@@ -39,7 +46,7 @@ export async function saveImage(
   buffer: Buffer,
   filename: string,
   mimeType: string
-): Promise<{ filename: string; path: string; buffer: Buffer; mimeType: string }> {
+): Promise<{ filename: string; path: string; thumbPath?: string; buffer: Buffer; mimeType: string }> {
   if (!ALLOWED_TYPES.includes(mimeType)) {
     throw new Error(`Invalid image type: ${mimeType}`);
   }
@@ -47,20 +54,27 @@ export async function saveImage(
     throw new Error(`Image too large: ${buffer.length} bytes`);
   }
 
-  const { buffer: finalBuffer, mimeType: finalMime } = await compressImage(buffer, mimeType);
+  const { buffer: finalBuffer, mimeType: finalMime, thumbBuffer } = await compressImage(buffer, mimeType);
 
   await mkdir(UPLOAD_DIR, { recursive: true });
-  const ext = finalMime === "image/jpeg" ? "jpg" : (filename.split(".").pop() || "jpg");
-  const uniqueName = `${randomUUID()}.${ext}`;
+  const uniqueName = `${randomUUID()}.webp`;
   const filePath = join(UPLOAD_DIR, uniqueName);
 
   await writeFile(filePath, finalBuffer);
 
+  let thumbPath: string | undefined;
+  if (thumbBuffer) {
+    const thumbName = `${randomUUID()}_thumb.webp`;
+    await writeFile(join(UPLOAD_DIR, thumbName), thumbBuffer);
+    thumbPath = `/uploads/${thumbName}`;
+  }
+
   return {
     filename: uniqueName,
     path: `/uploads/${uniqueName}`,
+    thumbPath,
     buffer: finalBuffer,
-    mimeType: finalMime,
+    mimeType: "image/webp",
   };
 }
 

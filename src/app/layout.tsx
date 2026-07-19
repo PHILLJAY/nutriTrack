@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope, Orbitron, Space_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const bodyFont = Manrope({
@@ -22,6 +23,13 @@ const labelFont = Space_Mono({
 export const metadata: Metadata = {
   title: "NutriTrack",
   description: "Track your calories, protein, and macros with AI-powered meal analysis",
+  manifest: "/manifest.json",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#c8f13e",
 };
 
 export default function RootLayout({
@@ -34,9 +42,20 @@ export default function RootLayout({
       lang="en"
       className={`dark ${bodyFont.variable} ${displayFont.variable} ${labelFont.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body className="min-h-full flex flex-col">
         <div className="app-backdrop" aria-hidden="true" />
         {children}
+        <Toaster
+          richColors
+          closeButton
+          position="top-right"
+          toastOptions={{
+            className: "font-body",
+          }}
+        />
       </body>
     </html>
   );

@@ -55,7 +55,7 @@ export function ManualMealEntry({ onSuccess }: ManualMealEntryProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="sm" variant="outline" />
+          <Button id="manual-meal-trigger" size="sm" variant="outline" />
         }
       >
         <UtensilsCrossed className="h-4 w-4 mr-1" />

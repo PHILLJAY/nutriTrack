@@ -26,6 +26,11 @@ export interface MealData {
   fiber?: number;
   sugar?: number;
   sodium?: number;
+  vitaminA?: number;
+  vitaminC?: number;
+  vitaminD?: number;
+  calcium?: number;
+  iron?: number;
   healthRating: number;
   mealType: string;
   eatenAt: string;
@@ -33,6 +38,7 @@ export interface MealData {
   source: string;
   imageId?: string;
   imageUrl?: string;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +52,11 @@ export interface GeminiMealAnalysis {
   fiber: number;
   sugar: number;
   sodium: number;
+  vitaminA_mcg?: number;
+  vitaminC_mg?: number;
+  vitaminD_mcg?: number;
+  calcium_mg?: number;
+  iron_mg?: number;
   healthRating: number;
   mealType: string;
   notes: string;

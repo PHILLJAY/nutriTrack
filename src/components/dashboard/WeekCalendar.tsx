@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   format,
   startOfWeek,
@@ -13,6 +13,10 @@ import {
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { SortableMealBubble } from "./SortableMealBubble";
 import { MealBubble } from "./MealBubble";
 import { MealDetail } from "./MealDetail";
 import { DailySummary } from "./DailySummary";
@@ -35,6 +39,11 @@ export function WeekCalendar({ meals, targets, onUpdate }: WeekCalendarProps) {
   );
   const [selectedMeal, setSelectedMeal] = useState<MealData | null>(null);
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
+  const [localMeals, setLocalMeals] = useState(meals);
+
+  useEffect(() => { setLocalMeals(meals); }, [meals]);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const days = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
@@ -47,17 +56,41 @@ export function WeekCalendar({ meals, targets, onUpdate }: WeekCalendarProps) {
       const key = format(day, "yyyy-MM-dd");
       map.set(
         key,
-        meals.filter((m) => isSameDay(new Date(m.eatenAt), day))
+        localMeals.filter((m) => isSameDay(new Date(m.eatenAt), day))
       );
     }
     return map;
-  }, [meals, days]);
+  }, [localMeals, days]);
 
   const selectedDayMeals = useMemo(
     () =>
-      meals.filter((m) => isSameDay(new Date(m.eatenAt), selectedDay)),
-    [meals, selectedDay]
+      localMeals.filter((m) => isSameDay(new Date(m.eatenAt), selectedDay)),
+    [localMeals, selectedDay]
   );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = selectedDayMeals.findIndex((m) => m.id === active.id);
+    const newIndex = selectedDayMeals.findIndex((m) => m.id === over.id);
+
+    const reordered = arrayMove([...localMeals], oldIndex, newIndex);
+    const updatedItems = reordered.map((m, idx) => ({ ...m, sortOrder: idx }));
+    setLocalMeals(updatedItems);
+
+    const res = await fetch("/api/meals/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: updatedItems.map((m) => ({ id: m.id, sortOrder: m.sortOrder ?? 0 })),
+      }),
+    });
+    if (!res.ok) {
+      toast.error("Failed to save order");
+      setLocalMeals(meals);
+    }
+  };
 
   return (
     <div className="space-y-4 md:flex md:gap-8 md:items-start">
@@ -143,7 +176,7 @@ export function WeekCalendar({ meals, targets, onUpdate }: WeekCalendarProps) {
               Send a meal photo to your Discord bot or add one manually.
             </p>
           </div>
-        ) : (
+        ) : selectedDayMeals.length === 1 ? (
           selectedDayMeals.map((meal) => (
             <MealBubble
               key={meal.id}
@@ -151,6 +184,25 @@ export function WeekCalendar({ meals, targets, onUpdate }: WeekCalendarProps) {
               onClick={() => setSelectedMeal(meal)}
             />
           ))
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={selectedDayMeals.map((m) => m.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {selectedDayMeals.map((meal) => (
+                <SortableMealBubble
+                  key={meal.id}
+                  meal={meal}
+                  onClick={() => setSelectedMeal(meal)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 

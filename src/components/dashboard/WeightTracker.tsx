@@ -76,8 +76,19 @@ export function WeightTracker() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Empty state */}
+        {entries.length === 0 && (
+          <div className="text-center py-6">
+            <Scale className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground">No weight entries yet</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              Log your first weight below to start tracking progress.
+            </p>
+          </div>
+        )}
+
         {/* Current weight */}
-        {latest && (
+        {entries.length > 0 && latest && (
           <div className="flex items-center gap-3">
             <div className="text-3xl font-bold">{latest.weight} kg</div>
             {diff !== 0 && (

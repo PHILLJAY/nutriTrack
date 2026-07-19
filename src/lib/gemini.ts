@@ -13,11 +13,17 @@ const ANALYSIS_PROMPT = `Analyze this meal photo. Return ONLY a valid JSON objec
   "fiber": grams_as_number,
   "sugar": grams_as_number,
   "sodium": milligrams_as_number,
+  "vitaminA_mcg": estimated_micrograms,
+  "vitaminC_mg": estimated_milligrams,
+  "vitaminD_mcg": estimated_micrograms,
+  "calcium_mg": estimated_milligrams,
+  "iron_mg": estimated_milligrams,
   "healthRating": 0_to_100_as_number,
   "mealType": "breakfast" or "lunch" or "dinner" or "snack",
   "notes": "brief description of what you see"
 }
 
+For micronutrients: estimate based on visible ingredients. Omit fields you cannot estimate (don't guess 0).
 For healthRating (0-100): Rate based on balance of macros, fiber content, processed vs whole foods, sugar level, sodium level. 80+ = very healthy, 50-79 = moderate, below 50 = unhealthy.
 Be realistic with portion estimates. If uncertain, estimate conservatively.`;
 
@@ -75,7 +81,7 @@ For example, if the user says "the protein should be 35g", return: {"protein": 3
 If they say "I only ate half", halve all nutritional values.
 If they say "add a side of rice", estimate and add the rice nutrition to the existing values.
 
-Fields available: name, calories, protein, carbs, fat, fiber, sugar, sodium, healthRating, mealType, notes`;
+Fields available: name, calories, protein, carbs, fat, fiber, sugar, sodium, vitaminA_mcg, vitaminC_mg, vitaminD_mcg, calcium_mg, iron_mg, healthRating, mealType, notes`;
 
   const result = await model.generateContent(prompt);
   const text = result.response.text();
@@ -110,12 +116,17 @@ Return ONLY a valid JSON object (no markdown, no code fences):
   "fiber": grams,
   "sugar": grams,
   "sodium": mg,
+  "vitaminA_mcg": estimated_micrograms,
+  "vitaminC_mg": estimated_milligrams,
+  "vitaminD_mcg": estimated_micrograms,
+  "calcium_mg": estimated_milligrams,
+  "iron_mg": estimated_milligrams,
   "healthRating": 0-100,
   "mealType": "${mealType}",
   "notes": "brief description"
 }
 
-Be realistic with estimates. Rate healthiness 0-100.`;
+Be realistic with estimates. Rate healthiness 0-100. For micronutrients, estimate based on described ingredients.`;
 
   const result = await model.generateContent(prompt);
   const text = result.response.text();
@@ -184,5 +195,79 @@ Keep suggestions practical and realistic. Prioritize protein if they need more.`
     return JSON.parse(jsonMatch[0]) as MealSuggestion[];
   } catch {
     throw new Error("Gemini returned malformed JSON for suggestions");
+  }
+}
+
+export interface MealPlanMeal {
+  name: string;
+  mealType: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  description: string;
+}
+
+export interface MealPlanDay {
+  day: number;
+  label: string;
+  meals: MealPlanMeal[];
+  totalCalories: number;
+  totalProtein: number;
+  totalCarbs: number;
+  totalFat: number;
+}
+
+export async function generateMealPlan(targets: {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  goal: string;
+}, days: number): Promise<MealPlanDay[]> {
+  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+
+  const prompt = `Generate a ${days}-day meal plan for someone with these daily targets:
+- Calories: ${targets.calories} kcal/day
+- Protein: ${targets.protein}g/day
+- Carbs: ${targets.carbs}g/day
+- Fat: ${targets.fat}g/day
+- Goal: ${targets.goal}
+
+For each day, provide 3-4 meals (breakfast, lunch, dinner, optional snack).
+Return ONLY a valid JSON array (no markdown, no code fences):
+[
+  {
+    "day": 1,
+    "label": "Day 1",
+    "meals": [
+      {
+        "name": "meal name",
+        "mealType": "breakfast/lunch/dinner/snack",
+        "calories": number,
+        "protein": grams,
+        "carbs": grams,
+        "fat": grams,
+        "description": "brief description"
+      }
+    ],
+    "totalCalories": sum_of_meals,
+    "totalProtein": sum_of_meals,
+    "totalCarbs": sum_of_meals,
+    "totalFat": sum_of_meals
+  }
+]
+
+Keep meals practical, varied, and realistic. Each day should be close to the daily targets.`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error("Failed to parse meal plan");
+
+  try {
+    return JSON.parse(jsonMatch[0]) as MealPlanDay[];
+  } catch {
+    throw new Error("Gemini returned malformed JSON for meal plan");
   }
 }

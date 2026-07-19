@@ -6,18 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Droplets, Plus, Minus } from "lucide-react";
 import { format } from "date-fns";
 
-const DAILY_GOAL = 8;
-
 export function WaterTracker() {
   const [glasses, setGlasses] = useState(0);
+  const [dailyGoal, setDailyGoal] = useState(8);
   const [loading, setLoading] = useState(false);
   const date = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
-    fetch(`/api/water?date=${date}`)
-      .then((r) => r.json())
-      .then((data) => setGlasses(data.glasses || 0))
-      .catch(() => {});
+    Promise.all([
+      fetch(`/api/water?date=${date}`).then((r) => r.json()),
+      fetch("/api/user").then((r) => r.ok ? r.json() : null),
+    ]).then(([waterData, userData]) => {
+      setGlasses(waterData.glasses || 0);
+      if (userData?.user?.weight) {
+        setDailyGoal(Math.max(4, Math.round((userData.user.weight * 35) / 250)));
+      }
+    }).catch(() => {});
   }, [date]);
 
   const updateGlasses = async (newCount: number) => {
@@ -37,7 +41,7 @@ export function WaterTracker() {
     }
   };
 
-  const pct = Math.min(100, (glasses / DAILY_GOAL) * 100);
+  const pct = Math.min(100, (glasses / dailyGoal) * 100);
 
   return (
     <Card>
@@ -60,7 +64,7 @@ export function WaterTracker() {
 
           <div className="flex-1">
             <div className="flex justify-between text-sm mb-1">
-              <span className="font-medium">{glasses} / {DAILY_GOAL} glasses</span>
+              <span className="font-medium">{glasses} / {dailyGoal} glasses</span>
               <span className="text-muted-foreground">{Math.round(pct)}%</span>
             </div>
             <div className="h-3 w-full rounded-full bg-muted overflow-hidden">

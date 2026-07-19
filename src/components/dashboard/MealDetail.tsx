@@ -5,6 +5,7 @@ import {
   Sheet,
   SheetContent,
 } from "@/components/ui/sheet";
+import { toast } from "sonner";
 import { MealDetailContent } from "./MealDetailContent";
 import type { MealData } from "@/types";
 
@@ -26,7 +27,6 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
     return () => mq.removeEventListener("change", handler);
   }, []);
   const [editing, setEditing] = useState(false);
-  const [error, setError] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
 
   if (!meal) return null;
@@ -50,13 +50,13 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
           notes: meal.notes,
         }),
       });
+      toast.success("Template saved");
     } finally {
       setSavingTemplate(false);
     }
   };
 
   const handleSave = async (updates: Partial<MealData>) => {
-    setError("");
     try {
       const res = await fetch(`/api/meals/${meal.id}`, {
         method: "PATCH",
@@ -66,28 +66,59 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
       if (res.ok) {
         setEditing(false);
         onUpdate();
+        toast.success("Meal updated");
       } else {
         const err = await res.json();
-        setError(err.error || "Failed to save changes");
+        toast.error(err.error || "Failed to save changes");
       }
     } catch {
-      setError("Network error. Please try again.");
+      toast.error("Network error. Please try again.");
     }
   };
 
   const handleDelete = async () => {
     if (!confirm("Delete this meal?")) return;
-    setError("");
+    const deletedMeal = { ...meal };
+    onClose();
+    onUpdate();
+
     try {
       const res = await fetch(`/api/meals/${meal.id}`, { method: "DELETE" });
       if (res.ok) {
-        onClose();
-        onUpdate();
+        toast.success("Meal deleted", {
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              await fetch("/api/meals", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: deletedMeal.name,
+                  calories: deletedMeal.calories,
+                  protein: deletedMeal.protein,
+                  carbs: deletedMeal.carbs,
+                  fat: deletedMeal.fat,
+                  fiber: deletedMeal.fiber,
+                  sugar: deletedMeal.sugar,
+                  sodium: deletedMeal.sodium,
+                  mealType: deletedMeal.mealType,
+                  notes: deletedMeal.notes,
+                  eatenAt: deletedMeal.eatenAt,
+                  imageId: deletedMeal.imageId,
+                }),
+              });
+              onUpdate();
+              toast.success("Meal restored");
+            },
+          },
+        });
       } else {
-        setError("Failed to delete meal");
+        toast.error("Failed to delete meal");
+        onUpdate();
       }
     } catch {
-      setError("Network error. Please try again.");
+      toast.error("Network error. Please try again.");
+      onUpdate();
     }
   };
 
@@ -95,8 +126,6 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
     meal,
     editing,
     setEditing,
-    error,
-    setError,
     savingTemplate,
     handleSaveAsTemplate,
     handleSave,
@@ -107,13 +136,20 @@ export function MealDetail({ meal, open, onClose, onUpdate }: MealDetailProps) {
 
   return (
     <>
-      {/* Desktop Panel */}
+      {/* Desktop Panel with click-outside backdrop */}
       {open && !isMobile && (
-        <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-background border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-40 translate-x-0">
-          <div className="h-full overflow-y-auto">
-            <MealDetailContent {...contentProps} />
+        <>
+          <div
+            className="fixed inset-0 z-30"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-background border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-40 translate-x-0">
+            <div className="h-full overflow-y-auto">
+              <MealDetailContent {...contentProps} />
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Mobile Sheet */}

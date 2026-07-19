@@ -24,7 +24,7 @@ export async function GET() {
 
   const templates = await prisma.mealTemplate.findMany({
     where: { userId },
-    orderBy: { updatedAt: "desc" },
+    orderBy: [{ isFavorite: "desc" }, { updatedAt: "desc" }],
   });
 
   return Response.json({ templates });

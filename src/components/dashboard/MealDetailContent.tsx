@@ -18,8 +18,6 @@ interface MealDetailContentProps {
   meal: MealData;
   editing: boolean;
   setEditing: (editing: boolean) => void;
-  error: string;
-  setError: (error: string) => void;
   savingTemplate: boolean;
   handleSaveAsTemplate: () => void;
   handleSave: (updates: Partial<MealData>) => void;
@@ -32,8 +30,6 @@ export function MealDetailContent({
   meal,
   editing,
   setEditing,
-  error,
-  setError,
   savingTemplate,
   handleSaveAsTemplate,
   handleSave,
@@ -41,6 +37,14 @@ export function MealDetailContent({
   onUpdate,
   onClose,
 }: MealDetailContentProps) {
+  const micros = [
+    meal.vitaminA != null ? { label: "Vitamin A", value: `${meal.vitaminA} mcg` } : null,
+    meal.vitaminC != null ? { label: "Vitamin C", value: `${meal.vitaminC} mg` } : null,
+    meal.vitaminD != null ? { label: "Vitamin D", value: `${meal.vitaminD} mcg` } : null,
+    meal.calcium != null ? { label: "Calcium", value: `${meal.calcium} mg` } : null,
+    meal.iron != null ? { label: "Iron", value: `${meal.iron} mg` } : null,
+  ].filter(Boolean);
+
   return (
     <>
       {/* Close button */}
@@ -108,13 +112,6 @@ export function MealDetailContent({
               <Trash2 className="h-3.5 w-3.5 mr-1.5" />
               Delete
             </Button>
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center justify-between">
-            {error}
-            <button onClick={() => setError("")} className="ml-2 font-bold">&times;</button>
           </div>
         )}
 
@@ -194,6 +191,22 @@ export function MealDetailContent({
                     <div className="text-xs text-muted-foreground mt-0.5">Sodium</div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {micros.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Micronutrients (estimated by AI)
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {micros.map((m) => (
+                    <div key={m!.label} className="bg-muted/40 rounded-full px-3 py-1 text-xs">
+                      <span className="text-muted-foreground">{m!.label}: </span>
+                      <span className="font-medium">{m!.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

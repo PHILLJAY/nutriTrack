@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { analyzeMealDescription } from "@/lib/gemini";
 import { calculateHealthRating } from "@/lib/health-rating";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 
 const schema = z.object({
@@ -14,6 +15,14 @@ export async function POST(request: NextRequest) {
   const userId = await getSession();
   if (!userId) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const { allowed, retryAfter } = checkRateLimit(userId, "meals/analyze-text");
+  if (!allowed) {
+    return Response.json(
+      { error: `Rate limit exceeded. Try again in ${retryAfter}s` },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
   }
 
   const body = await request.json();
@@ -43,6 +52,11 @@ export async function POST(request: NextRequest) {
         fiber: analysis.fiber,
         sugar: analysis.sugar,
         sodium: analysis.sodium,
+        vitaminA: analysis.vitaminA_mcg ?? null,
+        vitaminC: analysis.vitaminC_mg ?? null,
+        vitaminD: analysis.vitaminD_mcg ?? null,
+        calcium: analysis.calcium_mg ?? null,
+        iron: analysis.iron_mg ?? null,
         healthRating,
         mealType: analysis.mealType,
         eatenAt: new Date(),
